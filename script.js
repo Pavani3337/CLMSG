@@ -42,7 +42,7 @@ async function syncGoogleFormStudents() {
                 branch:
     data[i][4] === "ME"
         ? "MECH"
-        : data[i][4],,
+        : data[i][4],
 
                 photo: data[i][5],
 
