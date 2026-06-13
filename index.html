@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Library Management System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>College Library Management System</h1>
+
+<!-- LOGIN -->
+
+<div id="loginPage">
+
+    <h2>Admin Login</h2>
+
+    <input id="adminId" placeholder="Admin ID">
+
+    <input
+        id="adminPassword"
+        type="password"
+        placeholder="Password">
+
+    <button onclick="login()">
+        Login
+    </button>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboardPage" class="hidden">
+
+    <button onclick="showSection('registerSection')">
+        Register Student
+    </button>
+
+    <button onclick="showSection('booksSection')">
+        Books
+    </button>
+
+    <button onclick="showSection('branchesSection')">
+        Branches
+    </button>
+
+    <button onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+<!-- STUDENT REGISTRATION -->
+
+<div id="registerSection" class="hidden section">
+
+    <h2>Register Student</h2>
+
+    <input
+        id="studentName"
+        placeholder="Full Name">
+
+    <input
+        id="studentRoll"
+        placeholder="Roll Number">
+
+    <input
+        id="studentPhone"
+        placeholder="Phone Number">
+
+    <select id="studentBranch">
+
+        <option>CSE</option>
+        <option>ECE</option>
+        <option>EEE</option>
+        <option>MECH</option>
+        <option>CIVIL</option>
+
+    </select>
+
+   <input
+    type="file"
+    id="studentPhoto"
+    accept="image/*">
+
+    <button onclick="registerStudent()">
+        Register
+    </button>
+
+</div>
+
+<!-- BOOKS -->
+
+<div id="booksSection" class="hidden section">
+
+    <h2>Books Management</h2>
+
+    <input
+        id="bookSerial"
+        placeholder="Serial Number">
+
+    <input
+        id="bookName"
+        placeholder="Book Name">
+
+    <input
+        id="bookAuthor"
+        placeholder="Author Name">
+
+    <button onclick="addBook()">
+        Add Book
+    </button>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Serial</th>
+                <th>Book</th>
+                <th>Author</th>
+		<th>Delete</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="booksTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- BRANCHES -->
+
+<div id="branchesSection" class="hidden section">
+
+    <h2>Select Branch</h2>
+
+    <button onclick="loadStudents('CSE')">
+        CSE
+    </button>
+
+    <button onclick="loadStudents('ECE')">
+        ECE
+    </button>
+
+    <button onclick="loadStudents('EEE')">
+        EEE
+    </button>
+
+    <button onclick="loadStudents('MECH')">
+        MECH
+    </button>
+
+    <button onclick="loadStudents('CIVIL')">
+        CIVIL
+    </button>
+
+</div>
+
+<!-- STUDENTS -->
+
+<div id="studentsSection" class="hidden section">
+
+    <h2>Students</h2>
+
+    <input
+        id="searchBox"
+        placeholder="Search Roll Number"
+        onkeyup="searchStudent()">
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Roll</th>
+		<th>Phone</th>
+		<th>Delete</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="studentsTable">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- PROFILE -->
+
+<div id="profileSection" class="hidden section">
+
+    <h2>Student Profile</h2>
+
+    <img
+        id="profilePhoto"
+        width="120">
+
+    <h3 id="profileName"></h3>
+
+    <p id="profileRoll"></p>
+
+    <p id="profilePhone"></p>
+
+    <p id="profileBranch"></p>
+
+    <h3>Issued Books</h3>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>S.No</th>
+                <th>Book</th>
+                <th>Author</th>
+                <th>Issue</th>
+                <th>Due</th>
+            </tr>
+
+        </thead>
+
+        <tbody id="issuedTable">
+
+        </tbody>
+
+    </table>
+
+    <button onclick="showIssueBook()">
+        Issue Book
+    </button>
+
+    <div id="issueArea" class="hidden">
+
+    <input
+        id="bookSearch"
+        placeholder="Search Book Name"
+        onkeyup="searchBooks()">
+
+    <select id="bookSelect">
+
+    </select>
+
+    <input
+        id="issueDate"
+        type="date">
+
+    <input
+        id="dueDate"
+        type="date">
+
+    <button onclick="issueBook()">
+        Save
+    </button>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
