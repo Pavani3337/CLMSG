@@ -691,6 +691,11 @@ async function importStudents() {
         let students = [];
 
         for (let i = 1; i < data.length; i++) {
+	let photoUrl = data[i][5];
+             if (photoUrl.includes("id=")) {
+             const fileId = photoUrl.split("id=")[1];
+             photoUrl = "https://drive.google.com/thumbnail?id=" + fileId;
+            }
 
             students.push({
 
@@ -704,7 +709,7 @@ async function importStudents() {
 
                 branch: data[i][4],
 
-                photo: data[i][5],
+                photo: photoUrl,
 
                 issuedBooks: []
 
