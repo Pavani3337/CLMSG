@@ -702,7 +702,7 @@ async function importStudents() {
 
                 phone: data[i][3].toString(),
 
-                branch: data[i][4] === "ME" ? "MECH" : data[i][4],
+                branch: data[i][4],
 
                 photo: data[i][5],
 
