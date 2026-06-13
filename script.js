@@ -15,59 +15,6 @@ function initStorage() {
 }
 
 
-async function syncGoogleFormStudents() {
-
-    const url = "https://script.google.com/macros/s/AKfycbz9cte0vWjY8E5Jc2ird5J6pLtX1MI0fXkBsHYzEj6BBRkgE_ZPdM5OsZ4t5OflVG1M/exec";
-
-    try {
-
-        const response = await fetch(url);
-
-        const data = await response.json();
-
-        let students = [];
-
-        for (let i = 1; i < data.length; i++) {
-
-            students.push({
-
-                id: i,
-
-                name: data[i][1],
-
-                roll: data[i][2].toString(),
-
-                phone: data[i][3].toString(),
-
-                branch:
-    data[i][4] === "ME"
-        ? "MECH"
-        : data[i][4],
-
-                photo: data[i][5],
-
-                issuedBooks: []
-
-            });
-
-        }
-
-        localStorage.setItem(
-            "students",
-            JSON.stringify(students)
-        );
-
-        console.log("Google Form Students Synced");
-
-    }
-    catch(error) {
-
-        console.error(error);
-
-    }
-
-}
-
 
 window.onload = function () {
 
