@@ -431,24 +431,27 @@ function loadIssuedBooks() {
 
     <td>
 
-        <select
-            onchange="updateBookStatus(${index}, this.value)">
+        <td>
 
-            <option
-                value="Issued"
-                ${book.status === "Issued" ? "selected" : ""}>
-                Issued
-            </option>
+    <select
+        onchange="updateBookStatus(${index}, this.value)">
 
-            <option
-                value="Returned"
-                ${book.status === "Returned" ? "selected" : ""}>
-                Returned
-            </option>
+        <option
+            value="Issued"
+            ${book.status === "Issued" ? "selected" : ""}>
+            Issued
+        </option>
 
-        </select>
+        <option
+            value="Returned"
+            ${book.status === "Returned" ? "selected" : ""}>
+            Returned
+        </option>
 
-    </td>
+    </select>
+
+  </td>
+
 
 </tr>
 `;
@@ -614,7 +617,7 @@ function issueBook() {
             issueDate,
 
         dueDate:
-            dueDate
+            dueDate,
 
 	status:
             "Issued"
