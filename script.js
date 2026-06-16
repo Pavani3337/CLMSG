@@ -765,9 +765,7 @@ async function importStudents() {
             JSON.stringify(students)
         );
 
-        alert(
-            "Students imported successfully"
-        );
+        alert(students.length + " students imported successfully");
 
     }
     catch(error) {
