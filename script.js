@@ -430,8 +430,6 @@ function loadIssuedBooks() {
 
     <td>
 
-        <td>
-
     <select
         onchange="updateBookStatus(${index}, this.value)">
 
