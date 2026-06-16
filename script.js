@@ -678,6 +678,8 @@ function deleteBook(serial) {
 
 
 
+
+
 async function importStudents() {
 
     const url = "https://script.google.com/macros/s/AKfycbz9cte0vWjY8E5Jc2ird5J6pLtX1MI0fXkBsHYzEj6BBRkgE_ZPdM5OsZ4t5OflVG1M/exec";
@@ -688,32 +690,73 @@ async function importStudents() {
 
         const data = await response.json();
 
-        let students = [];
+        let students =
+            JSON.parse(
+                localStorage.getItem("students")
+            ) || [];
 
         for (let i = 1; i < data.length; i++) {
-	let photoUrl = data[i][5];
-             if (photoUrl.includes("id=")) {
-             const fileId = photoUrl.split("id=")[1];
-             photoUrl = "https://drive.google.com/thumbnail?id=" + fileId;
+
+            const roll =
+                data[i][2].toString();
+
+            let photoUrl =
+                data[i][5];
+
+            if (
+                photoUrl &&
+                photoUrl.includes("id=")
+            ) {
+
+                const fileId =
+                    photoUrl.split("id=")[1];
+
+                photoUrl =
+                    "https://drive.google.com/thumbnail?id=" +
+                    fileId;
             }
 
-            students.push({
+            const existingStudent =
+                students.find(
+                    student =>
+                        student.roll === roll
+                );
 
-                id: Date.now() + i,
+            if (existingStudent) {
 
-                name: data[i][1],
+                existingStudent.name =
+                    data[i][1];
 
-                roll: data[i][2].toString(),
+                existingStudent.phone =
+                    data[i][3].toString();
 
-                phone: data[i][3].toString(),
+                existingStudent.branch =
+                    data[i][4], 
+                existingStudent.photo =
+                    photoUrl;
 
-                branch: data[i][4],
+                // issuedBooks remains untouched
 
-                photo: photoUrl,
+            } else {
 
-                issuedBooks: []
+                students.push({
 
-            });
+                    id: Date.now() + i,
+
+                    name: data[i][1],
+
+                    roll: roll,
+
+                    phone: data[i][3].toString(),
+
+                    branch: data[i][4],
+                    photo: photoUrl,
+
+                    issuedBooks: []
+
+                });
+
+            }
 
         }
 
@@ -722,14 +765,18 @@ async function importStudents() {
             JSON.stringify(students)
         );
 
-        alert(students.length + " students imported successfully");
+        alert(
+            "Students imported successfully"
+        );
 
     }
     catch(error) {
 
         console.error(error);
 
-        alert("Import failed");
+        alert(
+            "Import failed"
+        );
 
     }
 
