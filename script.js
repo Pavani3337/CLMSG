@@ -450,6 +450,14 @@ function loadIssuedBooks() {
   </td>
 
 
+<td>
+        <input
+            type="date"
+            value="${book.returnDate || ''}"
+            onchange="updateReturnDate(${index}, this.value)">
+    </td>
+
+
 </tr>
 `;
     });
@@ -615,6 +623,8 @@ function issueBook() {
 
         dueDate:
             dueDate,
+
+	returnDate: "",
 
 	status:
             "Issued"
@@ -832,6 +842,43 @@ function updateBookStatus(bookIndex, status) {
     students[studentIndex]
         .issuedBooks[bookIndex]
         .status = status;
+
+    localStorage.setItem(
+        "students",
+        JSON.stringify(students)
+    );
+
+    currentStudent =
+        students[studentIndex];
+
+}
+
+
+
+
+
+
+
+function updateReturnDate(bookIndex, returnDate) {
+
+    const students =
+        JSON.parse(
+            localStorage.getItem("students")
+        );
+
+    const studentIndex =
+        students.findIndex(
+            student =>
+                student.id === currentStudent.id
+        );
+
+    if (studentIndex === -1) {
+        return;
+    }
+
+    students[studentIndex]
+        .issuedBooks[bookIndex]
+        .returnDate = returnDate;
 
     localStorage.setItem(
         "students",
