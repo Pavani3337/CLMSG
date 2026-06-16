@@ -420,16 +420,37 @@ function loadIssuedBooks() {
 
     currentStudent.issuedBooks.forEach((book, index) => {
 
-        html += `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${book.bookName}</td>
-            <td>${book.author}</td>
-            <td>${book.issueDate}</td>
-            <td>${book.dueDate}</td>
-        </tr>
-        `;
+       html += `
+<tr>
+    <td>${index + 1}</td>
+    <td>${book.bookName}</td>
+    <td>${book.author}</td>
+    <td>${book.issueDate}</td>
+    <td>${book.dueDate}</td>
 
+    <td>
+
+        <select
+            onchange="updateBookStatus(${index}, this.value)">
+
+            <option
+                value="Issued"
+                ${book.status === "Issued" ? "selected" : ""}>
+                Issued
+            </option>
+
+            <option
+                value="Returned"
+                ${book.status === "Returned" ? "selected" : ""}>
+                Returned
+            </option>
+
+        </select>
+
+    </td>
+
+</tr>
+`;
     });
 
     document
@@ -593,6 +614,9 @@ function issueBook() {
 
         dueDate:
             dueDate
+
+	status:
+            "Issued"
 
     });
 
@@ -765,7 +789,9 @@ async function importStudents() {
             JSON.stringify(students)
         );
 
-        alert(students.length + " students imported successfully");
+        alert(
+            "Students imported successfully"
+        );
 
     }
     catch(error) {
@@ -777,5 +803,41 @@ async function importStudents() {
         );
 
     }
+
+}
+
+
+
+
+
+
+function updateBookStatus(bookIndex, status) {
+
+    const students =
+        JSON.parse(
+            localStorage.getItem("students")
+        );
+
+    const studentIndex =
+        students.findIndex(
+            student =>
+                student.id === currentStudent.id
+        );
+
+    if (studentIndex === -1) {
+        return;
+    }
+
+    students[studentIndex]
+        .issuedBooks[bookIndex]
+        .status = status;
+
+    localStorage.setItem(
+        "students",
+        JSON.stringify(students)
+    );
+
+    currentStudent =
+        students[studentIndex];
 
 }
