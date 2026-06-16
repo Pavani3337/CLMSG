@@ -427,7 +427,6 @@ function loadIssuedBooks() {
     <td>${book.author}</td>
     <td>${book.issueDate}</td>
     <td>${book.dueDate}</td>
-    <td>${book.status}</td>
 
     <td>
 
