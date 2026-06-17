@@ -977,36 +977,39 @@ const deletedStudent =
 
 
 function updateBookStatus(bookIndex, status) {
+    const students = JSON.parse(localStorage.getItem("students"));
+    const books = JSON.parse(localStorage.getItem("books"));
 
-    const students =
-        JSON.parse(
-            localStorage.getItem("students")
-        );
-
-    const studentIndex =
-        students.findIndex(
-            student =>
-                student.id === currentStudent.id
-        );
-
-    if (studentIndex === -1) {
-        return;
-    }
-
-    students[studentIndex]
-        .issuedBooks[bookIndex]
-        .status = status;
-
-    localStorage.setItem(
-        "students",
-        JSON.stringify(students)
+    const studentIndex = students.findIndex(
+        student => student.id === currentStudent.id
     );
 
-    currentStudent =
-        students[studentIndex];
+    if (studentIndex === -1) return;
 
+    const book = students[studentIndex].issuedBooks[bookIndex];
+
+    // 🔥 IF RETURNED → restore book count
+    if (status === "Returned" && book.status !== "Returned") {
+        const bookIndexInLibrary = books.findIndex(
+            b => b.name === book.bookName
+        );
+
+        if (bookIndexInLibrary !== -1) {
+            books[bookIndexInLibrary].availableCopies += 1;
+        }
+    }
+
+    // update status
+    students[studentIndex].issuedBooks[bookIndex].status = status;
+
+    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem("books", JSON.stringify(books));
+
+    currentStudent = students[studentIndex];
+
+    loadIssuedBooks();
+    loadBooks();
 }
-
 
 
 
@@ -1042,4 +1045,29 @@ function updateReturnDate(bookIndex, returnDate) {
     currentStudent =
         students[studentIndex];
 
+}
+
+
+
+
+
+function handleReturnBook(studentId, bookName) {
+    let books = JSON.parse(localStorage.getItem("books")) || [];
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+
+    const studentIndex = students.findIndex(s => s.id == studentId);
+
+    if (studentIndex === -1) return;
+
+    const bookIndex = books.findIndex(b => b.name === bookName);
+
+    if (bookIndex !== -1) {
+        books[bookIndex].availableCopies += 1;
+    }
+
+    localStorage.setItem("books", JSON.stringify(books));
+    localStorage.setItem("students", JSON.stringify(students));
+
+    loadIssuedBooks();
+    loadBooks();
 }
