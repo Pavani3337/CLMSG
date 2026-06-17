@@ -666,6 +666,18 @@ function issueBook() {
 
     }
 
+
+
+    if (selectedBook.availableCopies <= 0) {
+
+    alert("No copies available");
+
+    return;
+
+}
+
+selectedBook.availableCopies--;
+
     const students =
         JSON.parse(
             localStorage.getItem("students")
@@ -712,6 +724,11 @@ function issueBook() {
         "students",
         JSON.stringify(students)
     );
+
+    localStorage.setItem(
+    "books",
+    JSON.stringify(books)
+);
 
     currentStudent =
         students[studentIndex];
