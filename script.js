@@ -790,6 +790,18 @@ async function importStudents() {
                         student.roll === roll
                 );
 
+	    let deletedStudents =
+    JSON.parse(
+        localStorage.getItem("deletedStudents")
+    ) || [];
+
+const deletedStudent =
+    deletedStudents.find(
+        student =>
+            student.roll === roll
+    );
+
+
             if (existingStudent) {
 
                 existingStudent.name =
@@ -805,7 +817,28 @@ async function importStudents() {
 
                 // issuedBooks remains untouched
 
-            } else {
+            } 
+
+
+		else if (deletedStudent) {
+
+    students.push(deletedStudent);
+
+    deletedStudents =
+        deletedStudents.filter(
+            student =>
+                student.roll !== roll
+        );
+
+    localStorage.setItem(
+        "deletedStudents",
+        JSON.stringify(deletedStudents)
+    );
+
+}
+
+
+		else {
 
                 students.push({
 
