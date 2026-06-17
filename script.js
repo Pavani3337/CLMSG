@@ -12,6 +12,13 @@ function initStorage() {
     if (!localStorage.getItem("books")) {
         localStorage.setItem("books", JSON.stringify([]));
     }
+
+    if (!localStorage.getItem("deletedStudents")) {
+    localStorage.setItem(
+        "deletedStudents",
+        JSON.stringify([])
+    );
+    }
 }
 
 
@@ -658,6 +665,7 @@ function issueBook() {
 }
 
 
+
 function deleteStudent(studentId) {
 
     if (!confirm("Delete this student?")) {
@@ -668,6 +676,29 @@ function deleteStudent(studentId) {
         JSON.parse(
             localStorage.getItem("students")
         );
+
+    let deletedStudents =
+        JSON.parse(
+            localStorage.getItem("deletedStudents")
+        ) || [];
+
+    const studentToDelete =
+        students.find(
+            student =>
+                student.id === studentId
+        );
+
+    if (studentToDelete) {
+
+        deletedStudents.push(
+            studentToDelete
+        );
+
+        localStorage.setItem(
+            "deletedStudents",
+            JSON.stringify(deletedStudents)
+        );
+    }
 
     students =
         students.filter(
@@ -683,6 +714,8 @@ function deleteStudent(studentId) {
     loadStudents(currentBranch);
 
 }
+
+
 
 function deleteBook(serial) {
 
