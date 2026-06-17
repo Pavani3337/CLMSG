@@ -677,6 +677,7 @@ function issueBook() {
 }
 
 selectedBook.availableCopies--;
+console.log(selectedBook);
 
     const students =
         JSON.parse(
