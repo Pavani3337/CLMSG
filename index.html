@@ -92,6 +92,8 @@
 
 <!-- BOOKS -->
 
+
+
 <div id="booksSection" class="hidden section">
 
     <h2>Books Management</h2>
@@ -107,31 +109,33 @@
     <input
         id="bookAuthor"
         placeholder="Author Name">
- 
+
     <input
         id="bookCopies"
         type="number"
         placeholder="Total Copies">
 
-
     <button onclick="addBook()">
         Add Book
     </button>
 
+    <input
+        id="bookSearchBox"
+        placeholder="Search Book Name"
+        onkeyup="searchBook()">
+
     <table>
 
         <thead>
-
             <tr>
                 <th>Serial</th>
-		<th>Book</th>
-		<th>Author</th>
-		<th>Total</th>
-		<th>Issued</th>
-		<th>Available</th>
-		<th>Delete</th>
+                <th>Book</th>
+                <th>Author</th>
+                <th>Total</th>
+                <th>Issued</th>
+                <th>Available</th>
+                <th>Delete</th>
             </tr>
-
         </thead>
 
         <tbody id="booksTable">
@@ -141,6 +145,9 @@
     </table>
 
 </div>
+
+
+
 
 <!-- BRANCHES -->
 
@@ -258,20 +265,10 @@
 
     <div id="issueArea" class="hidden">
 
-<h2>Books Management</h2>
-
-<input id="bookSerial" placeholder="Serial Number">
-<input id="bookName" placeholder="Book Name">
-<input id="bookAuthor" placeholder="Author Name">
-
-<input
-    id="bookSearchBox"
-    placeholder="Search Book Name"
-    onkeyup="searchBook()">
-
-<button onclick="addBook()">
-    Add Book
-</button>	
+    <input
+        id="bookSearch"
+        placeholder="Search Book Name"
+        onkeyup="searchBooks()">
 
     <select id="bookSelect">
 
@@ -290,7 +287,6 @@
     </button>
 
 </div>
-
 </div>
 
 <script src="script.js"></script>
