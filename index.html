@@ -107,6 +107,12 @@
     <input
         id="bookAuthor"
         placeholder="Author Name">
+ 
+    <input
+        id="bookCopies"
+        type="number"
+        placeholder="Total Copies">
+
 
     <button onclick="addBook()">
         Add Book
@@ -118,8 +124,11 @@
 
             <tr>
                 <th>Serial</th>
-                <th>Book</th>
-                <th>Author</th>
+		<th>Book</th>
+		<th>Author</th>
+		<th>Total</th>
+		<th>Issued</th>
+		<th>Available</th>
 		<th>Delete</th>
             </tr>
 
@@ -249,10 +258,20 @@
 
     <div id="issueArea" class="hidden">
 
-    <input
-        id="bookSearch"
-        placeholder="Search Book Name"
-        onkeyup="searchBooks()">
+<h2>Books Management</h2>
+
+<input id="bookSerial" placeholder="Serial Number">
+<input id="bookName" placeholder="Book Name">
+<input id="bookAuthor" placeholder="Author Name">
+
+<input
+    id="bookSearchBox"
+    placeholder="Search Book Name"
+    onkeyup="searchBook()">
+
+<button onclick="addBook()">
+    Add Book
+</button>	
 
     <select id="bookSelect">
 

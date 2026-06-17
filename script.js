@@ -201,44 +201,87 @@ function addBook() {
     const author =
         document.getElementById("bookAuthor").value.trim();
 
-    if (!serial || !name || !author) {
+    const totalCopies =
+        parseInt(
+            document.getElementById("bookCopies").value
+        );
+
+    if (
+        !serial ||
+        !name ||
+        !author ||
+        !totalCopies
+    ) {
+
         alert("Fill all fields properly");
         return;
+
     }
 
     const books =
         JSON.parse(localStorage.getItem("books")) || [];
 
     books.push({
+
         serial: serial,
+
         name: name,
-        author: author
+
+        author: author,
+
+        totalCopies: totalCopies,
+
+        availableCopies: totalCopies
+
     });
 
-    localStorage.setItem("books", JSON.stringify(books));
+    localStorage.setItem(
+        "books",
+        JSON.stringify(books)
+    );
 
     loadBooks();
 
     document.getElementById("bookSerial").value = "";
     document.getElementById("bookName").value = "";
     document.getElementById("bookAuthor").value = "";
+    document.getElementById("bookCopies").value = "";
+
 }
 
 
 function loadBooks() {
 
     const books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
+
+    renderBooks(books);
+
+}
+
+
+
+
+function renderBooks(books) {
 
     let html = "";
 
     books.forEach(book => {
+
+        const issued =
+            (book.totalCopies || 0) -
+            (book.availableCopies || 0);
 
         html += `
         <tr>
             <td>${book.serial || "-"}</td>
             <td>${book.name || "-"}</td>
             <td>${book.author || "-"}</td>
+            <td>${book.totalCopies || 0}</td>
+            <td>${issued}</td>
+            <td>${book.availableCopies || 0}</td>
 
             <td>
                 <button onclick="deleteBook('${book.serial}')">
@@ -250,8 +293,35 @@ function loadBooks() {
 
     });
 
-    document.getElementById("booksTable").innerHTML = html;
+    document
+        .getElementById("booksTable")
+        .innerHTML = html;
 }
+
+
+function searchBook() {
+
+    const searchText =
+        document
+            .getElementById("bookSearchBox")
+            .value
+            .toLowerCase();
+
+    const books =
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
+
+    const filteredBooks =
+        books.filter(book =>
+            book.name
+                .toLowerCase()
+                .includes(searchText)
+        );
+
+    renderBooks(filteredBooks);
+}
+
 
 
 
