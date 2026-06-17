@@ -698,28 +698,16 @@ console.log(selectedBook);
 
     }
 
-    students[
-        studentIndex
-    ].issuedBooks.push({
+   students[studentIndex].issuedBooks.push({
+    serial: selectedBook.serial,   // ⭐ ADD THIS LINE
+    bookName: selectedBook.name,
+    author: selectedBook.author,
+    issueDate: issueDate,
+    dueDate: dueDate,
+    returnDate: "",
+    status: "Issued"
+});
 
-        bookName:
-            selectedBook.name,
-
-        author:
-            selectedBook.author,
-
-        issueDate:
-            issueDate,
-
-        dueDate:
-            dueDate,
-
-	returnDate: "",
-
-	status:
-            "Issued"
-
-    });
 
     localStorage.setItem(
         "students",
@@ -991,8 +979,8 @@ function updateBookStatus(bookIndex, status) {
     // 🔥 IF RETURNED → restore book count
     if (status === "Returned" && book.status !== "Returned") {
         const bookIndexInLibrary = books.findIndex(
-            b => b.name === book.bookName
-        );
+    b => b.serial === book.serial
+);
 
         if (bookIndexInLibrary !== -1) {
             books[bookIndexInLibrary].availableCopies += 1;
