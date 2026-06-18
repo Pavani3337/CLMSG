@@ -3,6 +3,7 @@ const ADMIN_PASSWORD = "1234";
 
 let currentBranch = "";
 let currentStudent = null;
+let currentReport = "";
 
 function initStorage() {
     if (!localStorage.getItem("students")) {
@@ -19,7 +20,15 @@ function initStorage() {
         JSON.stringify([])
     );
     }
+
+if (!localStorage.getItem("libraryLogs")) {
+    localStorage.setItem(
+        "libraryLogs",
+        JSON.stringify([])
+    );
 }
+}
+
 
 
 
@@ -709,6 +718,35 @@ console.log(selectedBook);
 });
 
 
+
+let logs =
+    JSON.parse(
+        localStorage.getItem("libraryLogs")
+    ) || [];
+
+logs.push({
+
+    date: issueDate,
+
+    action: "Issued",
+
+    studentName:
+        students[studentIndex].name,
+
+    roll:
+        students[studentIndex].roll,
+
+    bookName:
+        selectedBook.name
+
+});
+
+localStorage.setItem(
+    "libraryLogs",
+    JSON.stringify(logs)
+);
+
+
     localStorage.setItem(
         "students",
         JSON.stringify(students)
@@ -739,6 +777,9 @@ console.log(selectedBook);
     alert("Book Issued Successfully");
 
 }
+
+
+
 
 
 
@@ -984,6 +1025,36 @@ function updateBookStatus(bookIndex, status) {
 
         if (bookIndexInLibrary !== -1) {
             books[bookIndexInLibrary].availableCopies += 1;
+
+let logs =
+    JSON.parse(
+        localStorage.getItem("libraryLogs")
+    ) || [];
+
+logs.push({
+
+    date:
+        new Date()
+        .toISOString()
+        .split("T")[0],
+
+    action: "Returned",
+
+    studentName:
+        students[studentIndex].name,
+
+    roll:
+        students[studentIndex].roll,
+
+    bookName:
+        book.bookName
+
+});
+
+localStorage.setItem(
+    "libraryLogs",
+    JSON.stringify(logs)
+);
         }
     }
 
@@ -1058,4 +1129,41 @@ function handleReturnBook(studentId, bookName) {
 
     loadIssuedBooks();
     loadBooks();
+}
+
+
+
+
+function generateSingleReport() {
+
+    const selectedDate =
+        document.getElementById(
+            "singleReportDate"
+        ).value;
+
+    generateReport(
+        selectedDate,
+        selectedDate
+    );
+}
+
+
+
+
+function generateRangeReport() {
+
+    const fromDate =
+        document.getElementById(
+            "fromDate"
+        ).value;
+
+    const toDate =
+        document.getElementById(
+            "toDate"
+        ).value;
+
+    generateReport(
+        fromDate,
+        toDate
+    );
 }

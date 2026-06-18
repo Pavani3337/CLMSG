@@ -45,6 +45,10 @@
         Branches
     </button>
 
+<button onclick="showSection('reportsSection')">
+    Reports
+</button>
+
     <button onclick="logout()">
         Logout
     </button>
@@ -288,6 +292,48 @@
 
 </div>
 </div>
+
+
+<div id="reportsSection" class="hidden section">
+
+    <h2>Library Reports</h2>
+
+    <h3>Single Date Report</h3>
+
+    <input
+        type="date"
+        id="singleReportDate">
+
+    <button onclick="generateSingleReport()">
+        Generate Report
+    </button>
+
+    <br><br>
+
+    <h3>Date Range Report</h3>
+
+    <input
+        type="date"
+        id="fromDate">
+
+    <input
+        type="date"
+        id="toDate">
+
+    <button onclick="generateRangeReport()">
+        Generate Report
+    </button>
+
+    <br><br>
+
+    <pre id="reportOutput"></pre>
+
+<button onclick="downloadReport()">
+    Download Report
+</button>
+
+</div>
+
 
 <script src="script.js"></script>
 
