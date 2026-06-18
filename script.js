@@ -1241,24 +1241,189 @@ Returned Books
 
 function downloadReport() {
 
-    const blob =
-        new Blob(
-            [currentReport],
-            { type: "text/plain" }
+    const { jsPDF } = window.jspdf;
+
+    const pdf = new jsPDF();
+
+    const logs =
+        JSON.parse(
+            localStorage.getItem("libraryLogs")
+        ) || [];
+
+    const singleDate =
+        document.getElementById(
+            "singleReportDate"
+        ).value;
+
+    const fromDate =
+        document.getElementById(
+            "fromDate"
+        ).value;
+
+    const toDate =
+        document.getElementById(
+            "toDate"
+        ).value;
+
+    let startDate;
+    let endDate;
+    let fileName;
+
+    if (singleDate) {
+
+        startDate = singleDate;
+        endDate = singleDate;
+
+        fileName =
+            `Library_Report_${singleDate}.pdf`;
+
+    } else {
+
+        startDate = fromDate;
+        endDate = toDate;
+
+        fileName =
+            `Library_Report_${fromDate}_to_${toDate}.pdf`;
+    }
+
+    let y = 20;
+
+    pdf.setFontSize(16);
+
+    pdf.text(
+        "College Library Report",
+        14,
+        y
+    );
+
+    y += 15;
+
+    for (
+        let currentDate = new Date(startDate);
+        currentDate <= new Date(endDate);
+        currentDate.setDate(
+            currentDate.getDate() + 1
+        )
+    ) {
+
+        const dateString =
+            currentDate
+            .toISOString()
+            .split("T")[0];
+
+        const dayLogs =
+            logs.filter(
+                log =>
+                    log.date === dateString
+            );
+
+        const issued =
+            dayLogs.filter(
+                log =>
+                    log.action === "Issued"
+            );
+
+        const returned =
+            dayLogs.filter(
+                log =>
+                    log.action === "Returned"
+            );
+
+        if (
+            issued.length === 0 &&
+            returned.length === 0
+        ) {
+            continue;
+        }
+
+        if (y > 220) {
+
+            pdf.addPage();
+
+            y = 20;
+        }
+
+        pdf.setFontSize(13);
+
+        pdf.text(
+            `Date : ${dateString}`,
+            14,
+            y
         );
 
-    const a =
-        document.createElement("a");
+        y += 8;
 
-    a.href =
-        URL.createObjectURL(blob);
+        pdf.text(
+            `Books Issued : ${issued.length}`,
+            14,
+            y
+        );
 
-    a.download =
-        "Library_Report.txt";
+        y += 7;
 
-    a.click();
+        pdf.text(
+            `Books Returned : ${returned.length}`,
+            14,
+            y
+        );
+
+        y += 10;
+
+        pdf.autoTable({
+
+            startY: y,
+
+            head: [[
+                "Issued Book",
+                "Student Name",
+                "Roll Number"
+            ]],
+
+            body: issued.map(
+                log => [
+
+                    log.bookName,
+
+                    log.studentName,
+
+                    log.roll
+                ]
+            )
+
+        });
+
+        y =
+            pdf.lastAutoTable.finalY + 10;
+
+        pdf.autoTable({
+
+            startY: y,
+
+            head: [[
+                "Returned Book",
+                "Student Name",
+                "Roll Number"
+            ]],
+
+            body: returned.map(
+                log => [
+
+                    log.bookName,
+
+                    log.studentName,
+
+                    log.roll
+                ]
+            )
+
+        });
+
+        y =
+            pdf.lastAutoTable.finalY + 15;
+    }
+
+    pdf.save(fileName);
 }
-
 
 
 
