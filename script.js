@@ -1342,6 +1342,38 @@ pdf.text(
 y += 15;
 
 
+const issuedCount =
+    issuedLogs.length;
+
+const returnedCount =
+    returnedLogs.length;
+
+const totalTransactions =
+    issuedCount +
+    returnedCount;
+
+pdf.autoTable({
+
+    startY: y,
+
+    head: [[
+        "Books Issued",
+        "Books Returned",
+        "Total Transactions"
+    ]],
+
+    body: [[
+        issuedCount,
+        returnedCount,
+        totalTransactions
+    ]]
+
+});
+
+y = pdf.lastAutoTable.finalY + 10;
+
+
+
     for (
         let currentDate = new Date(startDate);
         currentDate <= new Date(endDate);
