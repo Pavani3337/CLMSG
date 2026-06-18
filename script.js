@@ -36,7 +36,7 @@ window.onload = function () {
 
     initStorage();
 
-    syncGoogleFormStudents();
+    //syncGoogleFormStudents();
 
     const isLoggedIn =
         sessionStorage.getItem("isLoggedIn");
@@ -1166,4 +1166,131 @@ function generateRangeReport() {
         fromDate,
         toDate
     );
+}
+
+
+
+
+function generateReport(fromDate, toDate) {
+
+    const logs =
+        JSON.parse(
+            localStorage.getItem("libraryLogs")
+        ) || [];
+
+    let report = "";
+
+    let currentDate =
+        new Date(fromDate);
+
+    const endDate =
+        new Date(toDate);
+
+    while (currentDate <= endDate) {
+
+        const dateString =
+            currentDate
+            .toISOString()
+            .split("T")[0];
+
+        const dayLogs =
+            logs.filter(
+                log => log.date === dateString
+            );
+
+        const issuedBooks =
+            dayLogs.filter(
+                log => log.action === "Issued"
+            );
+
+        const returnedBooks =
+            dayLogs.filter(
+                log => log.action === "Returned"
+            );
+
+        report +=
+            "====================================\n";
+
+        report +=
+            "Date : " +
+            dateString +
+            "\n\n";
+
+        report +=
+            "Books Issued : " +
+            issuedBooks.length +
+            "\n";
+
+        report +=
+            "Books Returned : " +
+            returnedBooks.length +
+            "\n\n";
+
+        report +=
+            "Issued Books\n";
+
+        issuedBooks.forEach(book => {
+
+            report +=
+                "- " +
+                book.bookName +
+                " | " +
+                book.studentName +
+                " | " +
+                book.roll +
+                "\n";
+
+        });
+
+        report +=
+            "\nReturned Books\n";
+
+        returnedBooks.forEach(book => {
+
+            report +=
+                "- " +
+                book.bookName +
+                " | " +
+                book.studentName +
+                " | " +
+                book.roll +
+                "\n";
+
+        });
+
+        report += "\n\n";
+
+        currentDate.setDate(
+            currentDate.getDate() + 1
+        );
+    }
+
+    currentReport = report;
+
+    document.getElementById(
+        "reportOutput"
+    ).value = report;
+}
+
+
+
+
+function downloadReport() {
+
+    const blob =
+        new Blob(
+            [currentReport],
+            { type: "text/plain" }
+        );
+
+    const link =
+        document.createElement("a");
+
+    link.href =
+        URL.createObjectURL(blob);
+
+    link.download =
+        "Library_Report.txt";
+
+    link.click();
 }
