@@ -1016,6 +1016,11 @@ function updateBookStatus(bookIndex, status) {
     if (studentIndex === -1) return;
 
     const book = students[studentIndex].issuedBooks[bookIndex];
+
+console.log("New Status:", status);
+console.log("Current Book Status:", book.status);
+console.log(book);
+
     // 🔥 IF RETURNED → restore book count
     if (status === "Returned" && book.status !== "Returned") {
         const bookIndexInLibrary = books.findIndex(
