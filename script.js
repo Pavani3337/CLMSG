@@ -1286,17 +1286,61 @@ function downloadReport() {
             `Library_Report_${fromDate}_to_${toDate}.pdf`;
     }
 
-    let y = 20;
+    const collegeName =
+    "UCEN JNTUK";
 
-    pdf.setFontSize(16);
+const libraryName =
+    "Central Library";
 
-    pdf.text(
-        "College Library Report",
-        14,
-        y
-    );
+const generatedOn =
+    new Date().toLocaleString();
 
-    y += 15;
+let y = 20;
+
+pdf.setFontSize(18);
+
+pdf.text(
+    collegeName,
+    105,
+    y,
+    { align: "center" }
+);
+
+y += 10;
+
+pdf.setFontSize(14);
+
+pdf.text(
+    libraryName,
+    105,
+    y,
+    { align: "center" }
+);
+
+y += 10;
+
+pdf.setFontSize(16);
+
+pdf.text(
+    "Library Activity Report",
+    105,
+    y,
+    { align: "center" }
+);
+
+y += 10;
+
+pdf.setFontSize(10);
+
+pdf.text(
+    "Generated On : " +
+    generatedOn,
+    14,
+    y
+);
+
+y += 15;
+
 
     for (
         let currentDate = new Date(startDate);
