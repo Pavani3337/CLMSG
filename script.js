@@ -1141,10 +1141,7 @@ function generateSingleReport() {
             "singleReportDate"
         ).value;
 
-    generateReport(
-        selectedDate,
-        selectedDate
-    );
+    generateReport(selectedDate,selectedDate);
 }
 
 
