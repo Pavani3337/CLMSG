@@ -1161,20 +1161,20 @@ function generateRangeReport() {
 
 function generateReport(fromDate, toDate) {
 
-    const logs =
+    let logs =
         JSON.parse(
             localStorage.getItem("libraryLogs")
         ) || [];
 
     let report = "";
 
-    let currentDate =
-        new Date(fromDate);
-
-    const endDate =
-        new Date(toDate);
-
-    while (currentDate <= endDate) {
+    for (
+        let currentDate = new Date(fromDate);
+        currentDate <= new Date(toDate);
+        currentDate.setDate(
+            currentDate.getDate() + 1
+        )
+    ) {
 
         const dateString =
             currentDate
@@ -1186,78 +1186,54 @@ function generateReport(fromDate, toDate) {
                 log => log.date === dateString
             );
 
-        const issuedBooks =
+        const issued =
             dayLogs.filter(
                 log => log.action === "Issued"
             );
 
-        const returnedBooks =
+        const returned =
             dayLogs.filter(
                 log => log.action === "Returned"
             );
 
         report +=
-            "====================================\n";
+`====================================
+Date : ${dateString}
 
-        report +=
-            "Date : " +
-            dateString +
-            "\n\n";
+Books Issued : ${issued.length}
+Books Returned : ${returned.length}
 
-        report +=
-            "Books Issued : " +
-            issuedBooks.length +
-            "\n";
+Issued Books
+`;
 
-        report +=
-            "Books Returned : " +
-            returnedBooks.length +
-            "\n\n";
-
-        report +=
-            "Issued Books\n";
-
-        issuedBooks.forEach(book => {
+        issued.forEach(log => {
 
             report +=
-                "- " +
-                book.bookName +
-                " | " +
-                book.studentName +
-                " | " +
-                book.roll +
-                "\n";
+`- ${log.bookName} | ${log.studentName} | ${log.roll}
+`;
 
         });
 
-        report +=
-            "\nReturned Books\n";
+        report += `
+Returned Books
+`;
 
-        returnedBooks.forEach(book => {
+        returned.forEach(log => {
 
             report +=
-                "- " +
-                book.bookName +
-                " | " +
-                book.studentName +
-                " | " +
-                book.roll +
-                "\n";
+`- ${log.bookName} | ${log.studentName} | ${log.roll}
+`;
 
         });
 
         report += "\n\n";
-
-        currentDate.setDate(
-            currentDate.getDate() + 1
-        );
     }
 
     currentReport = report;
 
     document.getElementById(
         "reportOutput"
-    ).value = report;
+    ).textContent = report;
 }
 
 
@@ -1271,18 +1247,17 @@ function downloadReport() {
             { type: "text/plain" }
         );
 
-    const link =
+    const a =
         document.createElement("a");
 
-    link.href =
+    a.href =
         URL.createObjectURL(blob);
 
-    link.download =
+    a.download =
         "Library_Report.txt";
 
-    link.click();
+    a.click();
 }
-
 
 
 
