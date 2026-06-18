@@ -36,7 +36,7 @@ window.onload = function () {
 
     initStorage();
 
-    //syncGoogleFormStudents();
+    syncGoogleFormStudents();
 
     const isLoggedIn =
         sessionStorage.getItem("isLoggedIn");
