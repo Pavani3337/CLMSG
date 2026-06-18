@@ -514,38 +514,25 @@ function loadIssuedBooks() {
     <td>${book.issueDate}</td>
     <td>${book.dueDate}</td>
 
+    <td>${book.status}</td>
+
+    <td>${book.returnDate || "-"}</td>
+
     <td>
-
-    <select
-        onchange="updateBookStatus(${index}, this.value)">
-
-        <option
-            value="Issued"
-            ${book.status === "Issued" ? "selected" : ""}>
-            Issued
-        </option>
-
-        <option
-            value="Returned"
-            ${book.status === "Returned" ? "selected" : ""}>
-            Returned
-        </option>
-
-    </select>
-
-  </td>
-
-
-<td>
-        <input
-            type="date"
-            value="${book.returnDate || ''}"
-            onchange="updateReturnDate(${index}, this.value)">
+        ${
+            book.status === "Issued"
+            ?
+            `<button onclick="returnBook(${index})">
+                Return Book
+            </button>`
+            :
+            `Returned`
+        }
     </td>
-
 
 </tr>
 `;
+
     });
 
     document
@@ -1294,4 +1281,113 @@ function downloadReport() {
         "Library_Report.txt";
 
     link.click();
+}
+
+
+
+
+
+function returnBook(bookIndex) {
+
+    const students =
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
+
+    const books =
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
+
+    const studentIndex =
+        students.findIndex(
+            student =>
+                student.id === currentStudent.id
+        );
+
+    if (studentIndex === -1) {
+        return;
+    }
+
+    const issuedBook =
+        students[studentIndex]
+        .issuedBooks[bookIndex];
+
+    if (issuedBook.status === "Returned") {
+        return;
+    }
+
+    // Restore available copies
+
+    const libraryBook =
+        books.find(
+            book =>
+                book.serial === issuedBook.serial
+        );
+
+    if (libraryBook) {
+        libraryBook.availableCopies++;
+    }
+
+    // Set return details
+
+    const today =
+        new Date()
+        .toISOString()
+        .split("T")[0];
+
+    issuedBook.status =
+        "Returned";
+
+    issuedBook.returnDate =
+        today;
+
+    // Save return log
+
+    let logs =
+        JSON.parse(
+            localStorage.getItem("libraryLogs")
+        ) || [];
+
+    logs.push({
+
+        date: today,
+
+        action: "Returned",
+
+        studentName:
+            students[studentIndex].name,
+
+        roll:
+            students[studentIndex].roll,
+
+        bookName:
+            issuedBook.bookName
+
+    });
+
+    localStorage.setItem(
+        "libraryLogs",
+        JSON.stringify(logs)
+    );
+
+    localStorage.setItem(
+        "students",
+        JSON.stringify(students)
+    );
+
+    localStorage.setItem(
+        "books",
+        JSON.stringify(books)
+    );
+
+    currentStudent =
+        students[studentIndex];
+
+    loadIssuedBooks();
+    loadBooks();
+
+    alert(
+        "Book Returned Successfully"
+    );
 }
