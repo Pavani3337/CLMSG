@@ -1370,7 +1370,9 @@ pdf.autoTable({
 
 });
 
-y = pdf.lastAutoTable.finalY + 10;
+y =
+    pdf.lastAutoTable.finalY +
+    10;
 
 
 
