@@ -1236,15 +1236,15 @@ Returned Books
 
 
 
-
-function downloadReport() {
+async function downloadReport() {
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     const logo = new Image();
-    logo.src =
-    "https://ourjntuworld.weebly.com/uploads/9/1/5/2/91524230/jntuk-logo_orig.png";
-
+    logo.src = "logo.png";
+    await new Promise((resolve) => {
+    logo.onload = resolve;
+});
     const logs =
         JSON.parse(localStorage.getItem("libraryLogs")) || [];
 
@@ -1280,6 +1280,15 @@ function downloadReport() {
     }
 
 
+pdf.addImage(
+    logo,
+    "PNG",
+    10,
+    8,
+    20,
+    20
+);
+
     const collegeName =
     "UCEN JNTUK";
 
@@ -1289,7 +1298,7 @@ const libraryName =
 const generatedOn =
     new Date().toLocaleString();
 
-let y = 45;
+let y = 35;
 
 pdf.addImage(
     logo,
