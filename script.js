@@ -1241,6 +1241,9 @@ function downloadReport() {
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
+    const logo = new Image();
+    logo.src =
+    "https://www.eduopinions.com/wp-content/uploads/2020/04/Jawaharlal-Nehru-Technological-University-Kakinada-logo.jpg";
 
     const logs =
         JSON.parse(localStorage.getItem("libraryLogs")) || [];
@@ -1286,7 +1289,16 @@ const libraryName =
 const generatedOn =
     new Date().toLocaleString();
 
-let y = 20;
+let y = 45;
+
+pdf.addImage(
+    logo,
+    "PNG",
+    85,
+    5,
+    40,
+    30
+);
 
 pdf.setFontSize(18);
 
@@ -1486,6 +1498,23 @@ y =
         y =
             pdf.lastAutoTable.finalY + 15;
     }
+
+
+const pageHeight =
+    pdf.internal.pageSize.height;
+
+pdf.text(
+    "____________________",
+    140,
+    pageHeight - 25
+);
+
+pdf.text(
+    "Librarian Signature",
+    145,
+    pageHeight - 18
+);
+
 
    const blob = pdf.output("blob");
 const url = URL.createObjectURL(blob);
