@@ -54,8 +54,6 @@ window.onload = function () {
 };
 
 
-function syncGoogleFormStudents() {}
-
 
 function login() {
 
