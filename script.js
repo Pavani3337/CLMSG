@@ -1280,14 +1280,6 @@ async function downloadReport() {
     }
 
 
-pdf.addImage(
-    logo,
-    "PNG",
-    10,
-    8,
-    20,
-    20
-);
 
     const collegeName =
     "UCEN JNTUK";
@@ -1300,6 +1292,14 @@ const generatedOn =
 
 let y = 35;
 
+pdf.addImage(
+    logo,
+    "PNG",
+    85,
+    5,
+    40,
+    30
+);
 
 pdf.setFontSize(18);
 
