@@ -1241,27 +1241,23 @@ async function downloadReport() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
 
-const img = new Image();
+    const img = new Image();
 
-img.onload = function () {
+    img.onload = function () {
 
-    pdf.addImage(
-        img,
-        "PNG",
-        85,   // X position
-        5,    // Y position
-        40,   // Width
-        40    // Height
-    );
+        pdf.addImage(
+            img,
+            "PNG",
+            85,
+            5,
+            40,
+            30
+        );
 
     let y = 55;
 const collegeName = "UCEN JNTUK";
 const libraryName = "Central Library";
-    const logo = new Image();
-    logo.src = "logo.png";
-    await new Promise((resolve) => {
-    logo.onload = resolve;
-});
+
     const logs =
         JSON.parse(localStorage.getItem("libraryLogs")) || [];
 
