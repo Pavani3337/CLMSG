@@ -1242,49 +1242,42 @@ Returned Books
 function downloadReport() {
 
     const { jsPDF } = window.jspdf;
-
     const pdf = new jsPDF();
 
     const logs =
-        JSON.parse(
-            localStorage.getItem("libraryLogs")
-        ) || [];
+        JSON.parse(localStorage.getItem("libraryLogs")) || [];
+
+const issuedLogs = logs.filter(log => log.action === "Issued");
+const returnedLogs = logs.filter(log => log.action === "Returned");
 
     const singleDate =
-        document.getElementById(
-            "singleReportDate"
-        ).value;
+        document.getElementById("singleReportDate").value;
 
     const fromDate =
-        document.getElementById(
-            "fromDate"
-        ).value;
+        document.getElementById("fromDate").value;
 
     const toDate =
-        document.getElementById(
-            "toDate"
-        ).value;
+        document.getElementById("toDate").value;
 
-let startDate = startDate || fromDate || singleDate;
-let endDate = endDate || toDate || singleDate;
-let fileName;
+    let startDate = "";
+    let endDate = "";
+    let fileName = "";
 
-    if (singleDate) {
-
+        if (singleDate) {
         startDate = singleDate;
         endDate = singleDate;
-
-        fileName =
-            `Library_Report_${singleDate}.pdf`;
-
+        fileName = `Library_Report_${singleDate}.pdf`;
     } else {
-
         startDate = fromDate;
         endDate = toDate;
-
-        fileName =
-            `Library_Report_${fromDate}_to_${toDate}.pdf`;
+        fileName = `Library_Report_${fromDate}_to_${toDate}.pdf`;
     }
+
+    if (!startDate || !endDate) {
+        alert("Please select report date(s)");
+        return;
+    }
+
 
     const collegeName =
     "UCEN JNTUK";
