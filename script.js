@@ -1254,7 +1254,7 @@ async function downloadReport() {
             30
         );
 
-    let y = 55;
+    let y = 45;
 const collegeName = "UCEN JNTUK";
 const libraryName = "Central Library";
 
@@ -1295,17 +1295,6 @@ const libraryName = "Central Library";
 
 const generatedOn =
     new Date().toLocaleString();
-
-let y = 35;
-
-pdf.addImage(
-    logo,
-    "PNG",
-    85,
-    5,
-    40,
-    30
-);
 
 pdf.setFontSize(18);
 
