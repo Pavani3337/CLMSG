@@ -1240,6 +1240,23 @@ async function downloadReport() {
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
+
+const img = new Image();
+
+img.onload = function () {
+
+    pdf.addImage(
+        img,
+        "PNG",
+        85,   // X position
+        5,    // Y position
+        40,   // Width
+        40    // Height
+    );
+
+    let y = 55;
+const collegeName = "UCEN JNTUK";
+const libraryName = "Central Library";
     const logo = new Image();
     logo.src = "logo.png";
     await new Promise((resolve) => {
@@ -1517,17 +1534,10 @@ pdf.text(
 );
 
 
-   const blob = pdf.output("blob");
-const url = URL.createObjectURL(blob);
-
-const a = document.createElement("a");
-a.href = url;
-a.download = fileName;
-document.body.appendChild(a);
-a.click();
-
-document.body.removeChild(a);
-URL.revokeObjectURL(url);
+   
+pdf.save(fileName);
+};
+img.src = "logo.png";
 }
 
 
