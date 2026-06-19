@@ -1293,13 +1293,6 @@ const libraryName = "Central Library";
     }
 
 
-
-    const collegeName =
-    "UCEN JNTUK";
-
-const libraryName =
-    "Central Library";
-
 const generatedOn =
     new Date().toLocaleString();
 
