@@ -1243,7 +1243,7 @@ function downloadReport() {
     const pdf = new jsPDF();
     const logo = new Image();
     logo.src =
-    "https://www.eduopinions.com/wp-content/uploads/2020/04/Jawaharlal-Nehru-Technological-University-Kakinada-logo.jpg";
+    "https://edurank.org/assets/img/uni-logos/jawaharlal-nehru-technological-university-kakinada-logo.png";
 
     const logs =
         JSON.parse(localStorage.getItem("libraryLogs")) || [];
