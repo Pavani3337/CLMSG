@@ -1333,11 +1333,6 @@ pdf.text(
 y += 15;
 
 
-const issuedLogs =
-    logs.filter(log => log.action === "Issued");
-
-const returnedLogs =
-    logs.filter(log => log.action === "Returned");
 
 const issuedCount = issuedLogs.length;
 const returnedCount = returnedLogs.length;
