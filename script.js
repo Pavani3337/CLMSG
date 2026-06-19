@@ -54,6 +54,8 @@ window.onload = function () {
 };
 
 
+function syncGoogleFormStudents() {}
+
 
 function login() {
 
@@ -1247,8 +1249,8 @@ function downloadReport() {
     const logs =
         JSON.parse(localStorage.getItem("libraryLogs")) || [];
 
-const issuedLogs = logs.filter(log => log.action === "Issued");
-const returnedLogs = logs.filter(log => log.action === "Returned");
+    const issuedLogs = logs.filter(log => log.action === "Issued");
+    const returnedLogs = logs.filter(log => log.action === "Returned");
 
     const singleDate =
         document.getElementById("singleReportDate").value;
@@ -1263,7 +1265,7 @@ const returnedLogs = logs.filter(log => log.action === "Returned");
     let endDate = "";
     let fileName = "";
 
-        if (singleDate) {
+    if (singleDate) {
         startDate = singleDate;
         endDate = singleDate;
         fileName = `Library_Report_${singleDate}.pdf`;
@@ -1274,7 +1276,7 @@ const returnedLogs = logs.filter(log => log.action === "Returned");
     }
 
     if (!startDate || !endDate) {
-        alert("Please select report date(s)");
+        alert("Please select date(s)");
         return;
     }
 
