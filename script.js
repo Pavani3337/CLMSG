@@ -1265,9 +1265,9 @@ function downloadReport() {
             "toDate"
         ).value;
 
-    let startDate;
-    let endDate;
-    let fileName;
+let startDate = startDate || fromDate || singleDate;
+let endDate = endDate || toDate || singleDate;
+let fileName;
 
     if (singleDate) {
 
@@ -1342,15 +1342,16 @@ pdf.text(
 y += 15;
 
 
-const issuedCount =
-    issuedLogs.length;
+const issuedLogs =
+    logs.filter(log => log.action === "Issued");
 
-const returnedCount =
-    returnedLogs.length;
+const returnedLogs =
+    logs.filter(log => log.action === "Returned");
 
-const totalTransactions =
-    issuedCount +
-    returnedCount;
+const issuedCount = issuedLogs.length;
+const returnedCount = returnedLogs.length;
+const totalTransactions = issuedCount + returnedCount;
+
 
 pdf.autoTable({
 
