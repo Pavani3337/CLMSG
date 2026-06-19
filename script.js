@@ -1330,50 +1330,37 @@ pdf.text(
 
 y += 10;
 
-pdf.setFontSize(10);
+pdf.setFontSize(12);
+pdf.text("SUMMARY", 14, y);
 
-pdf.text(
-    "Generated On : " +
-    generatedOn,
-    14,
-    y
-);
+y += 5;
 
-y += 15;
-
-
-const issuedCount =
-    issuedLogs.length;
-
-const returnedCount =
-    returnedLogs.length;
+const issuedCount = issuedLogs.length;
+const returnedCount = returnedLogs.length;
 
 const totalTransactions =
-    issuedCount +
-    returnedCount;
+    issuedCount + returnedCount;
 
 pdf.autoTable({
-
-    startY: y,
-
+    startY: y + 5,
     head: [[
         "Books Issued",
         "Books Returned",
         "Total Transactions"
     ]],
-
     body: [[
-        issuedCount,
-        returnedCount,
-        totalTransactions
-    ]]
-
+        issuedCount.toString(),
+        returnedCount.toString(),
+        totalTransactions.toString()
+    ]],
+    theme: "grid",
+    styles: {
+        fontSize: 10,
+        halign: "center"
+    }
 });
 
-y =
-    pdf.lastAutoTable.finalY +
-    10;
-
+y = pdf.lastAutoTable.finalY + 10;
 
 
     for (
