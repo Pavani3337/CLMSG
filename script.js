@@ -27,6 +27,13 @@ if (!localStorage.getItem("libraryLogs")) {
         JSON.stringify([])
     );
 }
+
+if (!localStorage.getItem("bookHistory")) {
+    localStorage.setItem(
+        "bookHistory",
+        JSON.stringify([])
+    );
+}
 }
 
 
@@ -284,7 +291,13 @@ function renderBooks(books) {
         html += `
         <tr>
             <td>${book.serial || "-"}</td>
-            <td>${book.name || "-"}</td>
+<td
+onclick="showBookHistory('${book.serial}')"
+style="cursor:pointer;color:blue;">
+
+${book.name || "-"}
+
+</td>
             <td>${book.author || "-"}</td>
             <td>${book.totalCopies || 0}</td>
             <td>${issued}</td>
@@ -725,6 +738,39 @@ logs.push({
         selectedBook.name
 
 });
+
+
+let history =
+    JSON.parse(
+        localStorage.getItem("bookHistory")
+    ) || [];
+
+history.push({
+
+    serial: selectedBook.serial,
+
+    bookName: selectedBook.name,
+
+    studentName:
+        students[studentIndex].name,
+
+    roll:
+        students[studentIndex].roll,
+
+    issueDate: issueDate,
+
+    returnDate: "",
+
+    status: "Issued"
+
+});
+
+localStorage.setItem(
+    "bookHistory",
+    JSON.stringify(history)
+);
+
+
 
 localStorage.setItem(
     "libraryLogs",
@@ -1601,6 +1647,41 @@ const today =
     issuedBook.returnDate =
         today;
 
+
+let history =
+    JSON.parse(
+        localStorage.getItem("bookHistory")
+    ) || [];
+
+const record =
+    history.find(h =>
+
+        h.serial === issuedBook.serial &&
+
+        h.roll ===
+        students[studentIndex].roll &&
+
+        h.status === "Issued"
+
+    );
+
+if (record) {
+
+    record.status =
+        "Returned";
+
+    record.returnDate =
+        today;
+
+}
+
+localStorage.setItem(
+    "bookHistory",
+    JSON.stringify(history)
+);
+
+
+
     // Save return log
 
     let logs =
@@ -1648,5 +1729,56 @@ const today =
 
     alert(
         "Book Returned Successfully"
+    );
+}
+
+
+
+
+
+
+
+function showBookHistory(serial) {
+
+    const history =
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
+
+    const records =
+        history.filter(
+            h => h.serial === serial
+        );
+
+    let html = "";
+
+    records.forEach((record, index) => {
+
+        html += `
+        <tr>
+
+            <td>${index + 1}</td>
+
+            <td>${record.studentName}</td>
+
+            <td>${record.roll}</td>
+
+            <td>${record.issueDate}</td>
+
+            <td>${record.returnDate || "-"}</td>
+
+            <td>${record.status}</td>
+
+        </tr>
+        `;
+
+    });
+
+    document.getElementById(
+        "bookHistoryTable"
+    ).innerHTML = html;
+
+    showSection(
+        "bookHistorySection"
     );
 }
