@@ -5,6 +5,7 @@
 <title>Student Portal - CLMSG</title>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 body{
@@ -150,43 +151,39 @@ function downloadReport(){
         h.roll === currentStudent.roll
     );
 
-    let y = 20;
-
+    // HEADER
     pdf.setFontSize(16);
-    pdf.text("Student Library Report", 20, y);
-    y += 10;
+    pdf.text("Student Library Report", 105, 15, { align: "center" });
 
     pdf.setFontSize(12);
-    pdf.text("Name: " + currentStudent.name, 20, y);
-    y += 8;
+    pdf.text("Name: " + currentStudent.name, 14, 25);
+    pdf.text("Roll: " + currentStudent.roll, 14, 32);
+    pdf.text("Phone: " + currentStudent.phone, 14, 39);
 
-    pdf.text("Roll: " + currentStudent.roll, 20, y);
-    y += 8;
+    // TABLE DATA
+    const tableData = myRecords.map((r, index) => [
+        index + 1,
+        r.bookName,
+        r.issueDate,
+        r.returnDate || "-",
+        r.status
+    ]);
 
-    pdf.text("Phone: " + currentStudent.phone, 20, y);
-    y += 15;
-
-    pdf.text("Book History:", 20, y);
-    y += 10;
-
-    myRecords.forEach((r, i) => {
-
-        pdf.text(
-            `${i+1}. ${r.bookName} | Issue: ${r.issueDate} | Return: ${r.returnDate || "-"} | ${r.status}`,
-            20,
-            y
-        );
-
-        y += 8;
-
-        if(y > 270){
-            pdf.addPage();
-            y = 20;
-        }
+    pdf.autoTable({
+        startY: 50,
+        head: [[
+            "S.No",
+            "Book Name",
+            "Issue Date",
+            "Return Date",
+            "Status"
+        ]],
+        body: tableData
     });
 
     pdf.save(currentStudent.roll + "_report.pdf");
 }
+
 
 </script>
 
