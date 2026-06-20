@@ -1,3 +1,5 @@
+let studentLoggedIn = null;
+let otpStore = null;
 const ADMIN_ID = "admin";
 const ADMIN_PASSWORD = "1234";
 
@@ -450,6 +452,11 @@ function searchStudent() {
 }
 
 function showProfile(studentId) {
+
+if (!sessionStorage.getItem("isLoggedIn") && !studentLoggedIn) {
+    alert("Access Denied");
+    return;
+}
 
     hideSections();
 
@@ -1781,4 +1788,66 @@ function showBookHistory(serial) {
     showSection(
         "bookHistorySection"
     );
+}
+
+
+
+function sendStudentOTP() {
+    const roll = document.getElementById("studentLoginRoll").value;
+    const phone = document.getElementById("studentLoginPhone").value;
+
+    const students = JSON.parse(localStorage.getItem("students")) || [];
+
+    const student = students.find(s => s.roll === roll && s.phone === phone);
+
+    if (!student) {
+        alert("Student not found");
+        return;
+    }
+
+    otpStore = Math.floor(1000 + Math.random() * 9000);
+
+    alert("OTP sent (demo): " + otpStore);
+}
+
+
+
+
+function verifyStudentOTP() {
+    const enteredOtp = document.getElementById("studentOtp").value;
+
+    if (enteredOtp == otpStore) {
+        studentLoggedIn = document.getElementById("studentLoginRoll").value;
+        alert("Student Login Success");
+    } else {
+        alert("Invalid OTP");
+    }
+}
+
+
+
+
+function downloadMyReport() {
+
+    if (!studentLoggedIn) {
+        alert("Student not logged in");
+        return;
+    }
+
+    const history = JSON.parse(localStorage.getItem("bookHistory")) || [];
+
+    const myRecords = history.filter(h => h.roll === studentLoggedIn);
+
+    let report = "MY LIBRARY REPORT\n\n";
+
+    myRecords.forEach(r => {
+        report += `${r.bookName} | ${r.issueDate} | ${r.returnDate || "Not Returned"} | ${r.status}\n`;
+    });
+
+    const blob = new Blob([report], { type: "text/plain" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = studentLoggedIn + "_report.txt";
+    link.click();
 }
