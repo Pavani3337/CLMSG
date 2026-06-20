@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Student Portal - CLMSG</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <style>
 body{
     font-family: Arial;
@@ -138,39 +141,51 @@ function downloadReport(){
         return;
     }
 
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
     let history = JSON.parse(localStorage.getItem("bookHistory")) || [];
 
     let myRecords = history.filter(h =>
         h.roll === currentStudent.roll
     );
 
-    let report = `
-STUDENT LIBRARY REPORT
+    let y = 20;
 
-Name: ${currentStudent.name}
-Roll: ${currentStudent.roll}
-Phone: ${currentStudent.phone}
+    pdf.setFontSize(16);
+    pdf.text("Student Library Report", 20, y);
+    y += 10;
 
-BOOK HISTORY
-----------------------------------
-`;
+    pdf.setFontSize(12);
+    pdf.text("Name: " + currentStudent.name, 20, y);
+    y += 8;
 
-    myRecords.forEach(r=>{
-        report += `
-Book: ${r.bookName}
-Issue: ${r.issueDate}
-Return: ${r.returnDate || "-"}
-Status: ${r.status}
-----------------------------------
-`;
+    pdf.text("Roll: " + currentStudent.roll, 20, y);
+    y += 8;
+
+    pdf.text("Phone: " + currentStudent.phone, 20, y);
+    y += 15;
+
+    pdf.text("Book History:", 20, y);
+    y += 10;
+
+    myRecords.forEach((r, i) => {
+
+        pdf.text(
+            `${i+1}. ${r.bookName} | Issue: ${r.issueDate} | Return: ${r.returnDate || "-"} | ${r.status}`,
+            20,
+            y
+        );
+
+        y += 8;
+
+        if(y > 270){
+            pdf.addPage();
+            y = 20;
+        }
     });
 
-    let blob = new Blob([report], {type:"text/plain"});
-    let a = document.createElement("a");
-
-    a.href = URL.createObjectURL(blob);
-    a.download = currentStudent.roll + "_report.txt";
-    a.click();
+    pdf.save(currentStudent.roll + "_report.pdf");
 }
 
 </script>
