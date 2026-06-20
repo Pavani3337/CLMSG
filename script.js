@@ -1512,6 +1512,29 @@ pdf.text(
 );
 
 
+const totalPages = pdf.internal.getNumberOfPages();
+
+for (let i = 1; i <= totalPages; i++) {
+
+    pdf.setPage(i);
+
+    const pageWidth =
+        pdf.internal.pageSize.getWidth();
+
+    const pageHeight =
+        pdf.internal.pageSize.getHeight();
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+        `Page ${i} of ${totalPages}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: "center" }
+    );
+}
+
+
    
 pdf.save(fileName);
 };
