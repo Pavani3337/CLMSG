@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Portal - CLMSG</title>
+<style>
+body{
+    font-family: Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+
+.box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    max-width:500px;
+    margin:auto;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+input, button{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+th, td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<h2 style="text-align:center;">Student Library Portal</h2>
+
+<div class="box">
+
+    <h3>Enter Details</h3>
+
+    <input id="roll" placeholder="Enter Roll Number">
+    <input id="phone" placeholder="Enter Phone Number">
+
+    <button onclick="viewHistory()">View My History</button>
+
+    <button onclick="downloadReport()">Download My Report</button>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+
+let currentStudent = null;
+
+// ---------------- VERIFY STUDENT ----------------
+function viewHistory(){
+
+    let roll = document.getElementById("roll").value.trim();
+    let phone = document.getElementById("phone").value.trim();
+
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+
+    currentStudent = students.find(s =>
+        s.roll === roll && s.phone === phone
+    );
+
+    if(!currentStudent){
+        alert("Student not found");
+        return;
+    }
+
+    renderHistory();
+}
+
+// ---------------- SHOW HISTORY ----------------
+function renderHistory(){
+
+    let history = JSON.parse(localStorage.getItem("bookHistory")) || [];
+
+    let myRecords = history.filter(h =>
+        h.roll === currentStudent.roll
+    );
+
+    let html = `
+    <h3>My Book History</h3>
+    <table>
+        <tr>
+            <th>Book</th>
+            <th>Issue Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+        </tr>
+    `;
+
+    myRecords.forEach(r=>{
+        html += `
+        <tr>
+            <td>${r.bookName}</td>
+            <td>${r.issueDate}</td>
+            <td>${r.returnDate || "-"}</td>
+            <td>${r.status}</td>
+        </tr>
+        `;
+    });
+
+    html += `</table>`;
+
+    document.getElementById("result").innerHTML = html;
+}
+
+// ---------------- DOWNLOAD REPORT ----------------
+function downloadReport(){
+
+    if(!currentStudent){
+        alert("Please view history first");
+        return;
+    }
+
+    let history = JSON.parse(localStorage.getItem("bookHistory")) || [];
+
+    let myRecords = history.filter(h =>
+        h.roll === currentStudent.roll
+    );
+
+    let report = `
+STUDENT LIBRARY REPORT
+
+Name: ${currentStudent.name}
+Roll: ${currentStudent.roll}
+Phone: ${currentStudent.phone}
+
+BOOK HISTORY
+----------------------------------
+`;
+
+    myRecords.forEach(r=>{
+        report += `
+Book: ${r.bookName}
+Issue: ${r.issueDate}
+Return: ${r.returnDate || "-"}
+Status: ${r.status}
+----------------------------------
+`;
+    });
+
+    let blob = new Blob([report], {type:"text/plain"});
+    let a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = currentStudent.roll + "_report.txt";
+    a.click();
+}
+
+</script>
+
+</body>
+</html>
