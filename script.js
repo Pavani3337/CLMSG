@@ -925,6 +925,10 @@ async function importStudents() {
             const roll =
                 data[i][2].toString();
 
+console.log("Entire Row:", data[i]);
+console.log("Photo Column:", data[i][5]);
+console.log("Photo Type:", typeof data[i][5]);
+
             let photoUrl = data[i][5];
 
 console.log("Photo URL:", photoUrl);
