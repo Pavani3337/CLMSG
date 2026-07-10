@@ -923,13 +923,15 @@ async function importStudents() {
             const roll =
                 data[i][2].toString();
 
-            let photoUrl =
-                data[i][5];
+            let photoUrl = data[i][5];
 
-            if (
-                photoUrl &&
-                photoUrl.includes("id=")
-            ) {
+console.log("Photo URL:", photoUrl);
+console.log("Type:", typeof photoUrl);
+
+photoUrl = String(photoUrl || "");
+
+if (photoUrl.includes("id="))
+ {
 
                 const fileId =
                     photoUrl.split("id=")[1];
