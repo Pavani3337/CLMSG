@@ -920,6 +920,8 @@ async function importStudents() {
 
         for (let i = 1; i < data.length; i++) {
 
+        console.log(data[i]);
+
             const roll =
                 data[i][2].toString();
 
