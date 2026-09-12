@@ -1,3 +1,4 @@
+```css
 *{
     margin:0;
     padding:0;
@@ -6,7 +7,12 @@
 
 body{
     font-family:Arial, sans-serif;
-    background:#f4f6f9;
+    background-image:url("library-bg.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    min-height:100vh;
     padding:20px;
 }
 
@@ -29,7 +35,7 @@ h3{
 
 
 .section{
-    background:white;
+    background:rgba(255,255,255,0.92);
     padding:20px;
     margin-top:20px;
     border-radius:10px;
@@ -39,7 +45,7 @@ h3{
 #loginPage{
     max-width:400px;
     margin:auto;
-    background:white;
+    background:rgba(255,255,255,0.92);
     padding:20px;
     border-radius:10px;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
@@ -136,3 +142,4 @@ tr:hover{
     }
 
 }
+```
