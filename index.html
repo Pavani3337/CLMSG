@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>College Library Management System</title>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
 
 <h1>College Library Management System</h1>
+
 
 <!-- LOGIN -->
 
@@ -16,7 +22,9 @@
 
     <h2>Admin Login</h2>
 
-    <input id="adminId" placeholder="Admin ID">
+    <input
+        id="adminId"
+        placeholder="Admin ID">
 
     <input
         id="adminPassword"
@@ -28,6 +36,7 @@
     </button>
 
 </div>
+
 
 <!-- DASHBOARD -->
 
@@ -45,15 +54,16 @@
         Branches
     </button>
 
-<button onclick="showSection('reportsSection')">
-    Reports
-</button>
+    <button onclick="showSection('reportsSection')">
+        Reports
+    </button>
 
     <button onclick="logout()">
         Logout
     </button>
 
 </div>
+
 
 <!-- STUDENT REGISTRATION -->
 
@@ -83,10 +93,10 @@
 
     </select>
 
-   <input
-    type="file"
-    id="studentPhoto"
-    accept="image/*">
+    <input
+        type="file"
+        id="studentPhoto"
+        accept="image/*">
 
     <button onclick="registerStudent()">
         Register
@@ -94,9 +104,8 @@
 
 </div>
 
+
 <!-- BOOKS -->
-
-
 
 <div id="booksSection" class="hidden section">
 
@@ -131,7 +140,9 @@
     <table>
 
         <thead>
+
             <tr>
+
                 <th>Serial</th>
                 <th>Book</th>
                 <th>Author</th>
@@ -139,7 +150,9 @@
                 <th>Issued</th>
                 <th>Available</th>
                 <th>Delete</th>
+
             </tr>
+
         </thead>
 
         <tbody id="booksTable">
@@ -151,54 +164,51 @@
 </div>
 
 
-
+<!-- BOOK HISTORY -->
 
 <div
-id="bookHistorySection"
-class="section hidden">
+    id="bookHistorySection"
+    class="section hidden">
 
-<h2>Book Borrowing History</h2>
+    <h2>Book Borrowing History</h2>
 
-<table border="1">
+    <table border="1">
 
-<thead>
+        <thead>
 
-<tr>
+            <tr>
 
-<th>S.No</th>
-<th>Student Name</th>
-<th>Roll No</th>
-<th>Issue Date</th>
-<th>Return Date</th>
-<th>Status</th>
+                <th>S.No</th>
+                <th>Student Name</th>
+                <th>Roll No</th>
+                <th>Issue Date</th>
+                <th>Return Date</th>
+                <th>Status</th>
 
-</tr>
+            </tr>
 
-</thead>
+        </thead>
 
-<tbody id="bookHistoryTable">
+        <tbody id="bookHistoryTable">
 
-</tbody>
+        </tbody>
 
-</table>
+    </table>
 
 </div>
-
-
 
 
 <!-- BRANCHES -->
 
 <div id="branchesSection" class="hidden section">
 
-    <h2>Select Branch</h2>  
+    <h2>Select Branch</h2>
 
     <button onclick="importStudents()">
         Import Students
     </button>
 
     <br><br>
-
 
     <button onclick="loadStudents('CSE')">
         CSE
@@ -222,6 +232,7 @@ class="section hidden">
 
 </div>
 
+
 <!-- STUDENTS -->
 
 <div id="studentsSection" class="hidden section">
@@ -238,11 +249,13 @@ class="section hidden">
         <thead>
 
             <tr>
+
                 <th>S.No</th>
                 <th>Name</th>
                 <th>Roll</th>
-		<th>Phone</th>
-		<th>Delete</th>
+                <th>Phone</th>
+                <th>Actions</th>
+
             </tr>
 
         </thead>
@@ -255,7 +268,8 @@ class="section hidden">
 
 </div>
 
-<!-- PROFILE -->
+
+<!-- STUDENT PROFILE -->
 
 <div id="profileSection" class="hidden section">
 
@@ -280,14 +294,16 @@ class="section hidden">
         <thead>
 
             <tr>
+
                 <th>S.No</th>
                 <th>Book</th>
                 <th>Author</th>
                 <th>Issue</th>
                 <th>Due</th>
-		<th>Status</th>
-		<th>Return Date</th>
-		<th>Action</th>
+                <th>Status</th>
+                <th>Return Date</th>
+                <th>Action</th>
+
             </tr>
 
         </thead>
@@ -302,32 +318,36 @@ class="section hidden">
         Issue Book
     </button>
 
+
     <div id="issueArea" class="hidden">
 
-    <input
-        id="bookSearch"
-        placeholder="Search Book Name"
-        onkeyup="searchBooks()">
+        <input
+            id="bookSearch"
+            placeholder="Search Book Name"
+            onkeyup="searchBooks()">
 
-    <select id="bookSelect">
+        <select id="bookSelect">
 
-    </select>
+        </select>
 
-    <input
-        id="issueDate"
-        type="date">
+        <input
+            id="issueDate"
+            type="date">
 
-    <input
-        id="dueDate"
-        type="date">
+        <input
+            id="dueDate"
+            type="date">
 
-    <button onclick="issueBook()">
-        Save
-    </button>
+        <button onclick="issueBook()">
+            Save
+        </button>
+
+    </div>
 
 </div>
-</div>
 
+
+<!-- REPORTS -->
 
 <div id="reportsSection" class="hidden section">
 
@@ -363,14 +383,26 @@ class="section hidden">
 
     <pre id="reportOutput"></pre>
 
-<button onclick="downloadReport()">
-    Download Report
-</button>
+    <button onclick="downloadReport()">
+        Download Report
+    </button>
 
 </div>
 
+
+<!-- LIBRARIES -->
+
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+
+<!-- QR CODE LIBRARY -->
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+
+<!-- MAIN SCRIPT -->
+
 <script src="script.js"></script>
 
 </body>
