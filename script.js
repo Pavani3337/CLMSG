@@ -118,7 +118,8 @@ function showSection(id) {
 
 // ================= REGISTER STUDENT =================
 
-function registerStudent() {
+// ================= REGISTER STUDENT =================
+async function registerStudent() {
 
     const name =
         document.getElementById("studentName").value.trim();
@@ -136,66 +137,59 @@ function registerStudent() {
         document.getElementById("studentPhoto").files[0];
 
     if (!name || !roll || !phone || !branch || !photoFile) {
-
         alert("Please fill all fields");
-
         return;
     }
 
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
 
-        let students =
-            JSON.parse(localStorage.getItem("students")) || [];
+        try {
 
-        const existing =
-            students.find(s => s.roll === roll);
+            const response = await fetch(API + "/students", {
+                method: "POST",
 
-        if (existing) {
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            alert("Student already registered");
+                body: JSON.stringify({
+                    name: name,
+                    roll: roll,
+                    phone: phone,
+                    branch: branch,
+                    photo: e.target.result
+                })
+            });
 
-            return;
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.error || "Failed to register student");
+                return;
+            }
+
+            alert("Student registered successfully");
+
+            document.getElementById("studentName").value = "";
+            document.getElementById("studentRoll").value = "";
+            document.getElementById("studentPhone").value = "";
+            document.getElementById("studentPhoto").value = "";
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Backend is not running");
         }
-
-        const student = {
-
-            id: Date.now(),
-
-            name: name,
-
-            roll: roll,
-
-            phone: phone,
-
-            branch: branch,
-
-            photo: e.target.result,
-
-            issuedBooks: []
-        };
-
-        students.push(student);
-
-        localStorage.setItem(
-            "students",
-            JSON.stringify(students)
-        );
-
-        alert("Student registered successfully");
-
-        document.getElementById("studentName").value = "";
-
-        document.getElementById("studentRoll").value = "";
-
-        document.getElementById("studentPhone").value = "";
-
-        document.getElementById("studentPhoto").value = "";
     };
 
     reader.readAsDataURL(photoFile);
 }
+
+
+
 
 
 // ================= ADD BOOK =================
@@ -468,7 +462,10 @@ async function deleteBook(serial) {
 
 // ================= LOAD STUDENTS =================
 
-function loadStudents(branch) {
+
+
+// ================= LOAD STUDENTS =================
+async function loadStudents(branch) {
 
     currentBranch = branch;
 
@@ -478,15 +475,32 @@ function loadStudents(branch) {
         .getElementById("studentsSection")
         .classList.remove("hidden");
 
-    const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+    try {
 
-    const filtered =
-        students.filter(student =>
-            student.branch === branch
-        );
+        const response =
+            await fetch(API + "/students");
 
-    renderStudents(filtered);
+        const students =
+            await response.json();
+
+        if (!response.ok) {
+            alert("Failed to load students");
+            return;
+        }
+
+        const filtered =
+            students.filter(student =>
+                student.branch === branch
+            );
+
+        renderStudents(filtered);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Backend is not running");
+    }
 }
 
 
@@ -509,7 +523,7 @@ function renderStudents(students) {
             <td>${index + 1}</td>
 
             <td>
-                <button onclick="showProfile(${student.id})">
+                <button onclick="showProfile('${student.roll}')">
                     ${student.name}
                 </button>
             </td>
@@ -526,7 +540,7 @@ function renderStudents(students) {
                 </button>
 
                 <button
-                    onclick="deleteStudent(${student.id})">
+                    onclick="deleteStudent(${student.roll})">
                     Delete
                 </button>
 
@@ -541,7 +555,8 @@ function renderStudents(students) {
 
 // ================= SEARCH STUDENT =================
 
-function searchStudent() {
+// ================= SEARCH STUDENT =================
+async function searchStudent() {
 
     const search =
         document
@@ -550,24 +565,39 @@ function searchStudent() {
             .trim()
             .toLowerCase();
 
-    const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+    try {
 
-    const filtered =
-        students.filter(student =>
+        const response =
+            await fetch(API + "/students");
 
-            student.branch === currentBranch &&
+        const students =
+            await response.json();
 
-            student.roll.toLowerCase().includes(search)
-        );
+        const filtered =
+            students.filter(student =>
 
-    renderStudents(filtered);
+                student.branch === currentBranch &&
+
+                student.roll
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        renderStudents(filtered);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Failed to search students");
+    }
 }
-
 
 // ================= STUDENT PROFILE =================
 
-function showProfile(studentId) {
+// ================= STUDENT PROFILE =================
+async function showProfile(roll) {
 
     if (
         sessionStorage.getItem("isLoggedIn") !== "true" &&
@@ -579,43 +609,59 @@ function showProfile(studentId) {
         return;
     }
 
-    const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+    try {
 
-    currentStudent =
-        students.find(s => s.id === studentId);
+        const response =
+            await fetch(
+                API + "/students/" +
+                encodeURIComponent(roll)
+            );
 
-    if (!currentStudent) {
+        const student =
+            await response.json();
 
-        alert("Student not found");
+        if (!response.ok) {
 
-        return;
+            alert(student.error || "Student not found");
+
+            return;
+        }
+
+        currentStudent = student;
+
+        hideSections();
+
+        document
+            .getElementById("profileSection")
+            .classList.remove("hidden");
+
+        document.getElementById("profileName").innerText =
+            currentStudent.name;
+
+        document.getElementById("profileRoll").innerText =
+            "Roll: " + currentStudent.roll;
+
+        document.getElementById("profilePhone").innerText =
+            "Phone: " + currentStudent.phone;
+
+        document.getElementById("profileBranch").innerText =
+            "Branch: " + currentStudent.branch;
+
+        document.getElementById("profilePhoto").src =
+            currentStudent.photo ||
+            "https://via.placeholder.com/120";
+
+        await loadIssuedBooks();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Failed to load student profile");
     }
-
-    hideSections();
-
-    document
-        .getElementById("profileSection")
-        .classList.remove("hidden");
-
-    document.getElementById("profileName").innerText =
-        currentStudent.name;
-
-    document.getElementById("profileRoll").innerText =
-        "Roll: " + currentStudent.roll;
-
-    document.getElementById("profilePhone").innerText =
-        "Phone: " + currentStudent.phone;
-
-    document.getElementById("profileBranch").innerText =
-        "Branch: " + currentStudent.branch;
-
-    document.getElementById("profilePhoto").src =
-        currentStudent.photo ||
-        "https://via.placeholder.com/120";
-
-    loadIssuedBooks();
 }
+
+
 
 
 // ================= LOAD ISSUED BOOKS =================
@@ -1043,6 +1089,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 // ================= IMPORT STUDENTS =================
 
+// ================= IMPORT STUDENTS =================
 async function importStudents() {
 
     const url =
@@ -1050,28 +1097,22 @@ async function importStudents() {
 
     try {
 
-        const response =
-            await fetch(url);
+        const response = await fetch(url);
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (!Array.isArray(data)) {
-
             alert("Invalid student data");
-
             return;
         }
 
-        let students =
-            JSON.parse(localStorage.getItem("students")) || [];
-
         let importedCount = 0;
+        let existingCount = 0;
 
-        data.forEach(row => {
+        for (const row of data) {
 
             if (!row || row.length < 5) {
-                return;
+                continue;
             }
 
             const name =
@@ -1090,9 +1131,10 @@ async function importStudents() {
                 String(row[5] || "").trim();
 
             if (!name || !roll) {
-                return;
+                continue;
             }
 
+            // Convert Google Drive photo URL
             if (photo.includes("id=")) {
 
                 const id =
@@ -1104,58 +1146,123 @@ async function importStudents() {
                     "&sz=w500";
             }
 
-            const existing =
-                students.find(s => s.roll === roll);
+            // ================= SEND TO MYSQL =================
 
-            if (existing) {
+            const mysqlResponse =
+                await fetch(API + "/students", {
 
-                existing.name = name;
+                    method: "POST",
 
-                existing.phone = phone;
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                existing.branch = branch;
+                    body: JSON.stringify({
 
-                existing.photo =
-                    photo || existing.photo;
+                        name: name,
 
-                existing.issuedBooks =
-                    existing.issuedBooks || [];
+                        roll: roll,
 
-            } else {
+                        phone: phone,
 
-                students.push({
+                        branch: branch,
 
-                    id: Date.now() + Math.random(),
+                        photo: photo || null
 
-                    name: name,
+                    })
 
-                    roll: roll,
-
-                    phone: phone,
-
-                    branch: branch,
-
-                    photo: photo,
-
-                    issuedBooks: []
                 });
+
+            const mysqlData =
+                await mysqlResponse.json();
+
+            // Student already exists
+            if (mysqlResponse.status === 409) {
+
+                existingCount++;
+
+                console.log(
+                    "Student already exists:",
+                    roll
+                );
+
+                continue;
+            }
+
+            // Other error
+            if (!mysqlResponse.ok) {
+
+                console.error(
+                    "MySQL error for",
+                    roll,
+                    mysqlData
+                );
+
+                continue;
             }
 
             importedCount++;
-        });
+        }
 
+        alert(
+            importedCount +
+            " new students added to MySQL.\n" +
+            existingCount +
+            " students already existed."
+        );
+
+        // Load students from MySQL
+        await loadStudentsFromDatabase();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to import students.\n" +
+            "Make sure the backend is running."
+        );
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+// ================= LOAD STUDENTS FROM MYSQL =================
+async function loadStudentsFromDatabase() {
+
+    try {
+
+        const response =
+            await fetch(API + "/students");
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to fetch students"
+            );
+        }
+
+        const students =
+            await response.json();
+
+        // Keep frontend temporarily synchronized
         localStorage.setItem(
             "students",
             JSON.stringify(students)
         );
 
-        alert(
-            importedCount +
-            " students imported/updated successfully."
-        );
-
         if (currentBranch) {
+
             loadStudents(currentBranch);
+
         }
 
     } catch (error) {
@@ -1163,10 +1270,16 @@ async function importStudents() {
         console.error(error);
 
         alert(
-            "Unable to import students. Please check the connection."
+            "Failed to load students from MySQL"
         );
     }
 }
+
+
+
+
+
+
 
 
 // ================= STUDENT OTP =================
