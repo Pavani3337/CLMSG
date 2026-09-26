@@ -1288,3 +1288,47 @@ app.get("/api/reports/library", async (req, res) => {
         });
     }
 });
+
+
+
+
+
+
+
+
+
+
+// ================= CHECK DELETED STUDENT =================
+
+app.get("/api/students/deleted/:roll", async (req, res) => {
+
+    const { roll } = req.params;
+
+    try {
+
+        const [rows] = await pool.query(
+            "SELECT id FROM deleted_students WHERE roll = ?",
+            [roll]
+        );
+
+        if (rows.length > 0) {
+
+            return res.json({
+                deleted: true
+            });
+
+        }
+
+        res.status(404).json({
+            deleted: false
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to check deleted student"
+        });
+    }
+});

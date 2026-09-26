@@ -1089,9 +1089,14 @@ new QRCode(document.getElementById("qrcode"), {
 }
 
 
-// ================= IMPORT STUDENTS =================
+
+
+
+
+
 
 // ================= IMPORT STUDENTS =================
+
 async function importStudents() {
 
     const url =
@@ -1100,7 +1105,6 @@ async function importStudents() {
     try {
 
         const response = await fetch(url);
-
         const data = await response.json();
 
         if (!Array.isArray(data)) {
@@ -1110,6 +1114,7 @@ async function importStudents() {
 
         let importedCount = 0;
         let existingCount = 0;
+        let deletedCount = 0;
 
         for (const row of data) {
 
@@ -1148,6 +1153,27 @@ async function importStudents() {
                     "&sz=w500";
             }
 
+            // ================= CHECK DELETED STUDENT =================
+
+            const deletedResponse =
+                await fetch(
+                    API +
+                    "/students/deleted/" +
+                    encodeURIComponent(roll)
+                );
+
+            if (deletedResponse.ok) {
+
+                deletedCount++;
+
+                console.log(
+                    "Student was deleted from CLMSG:",
+                    roll
+                );
+
+                continue;
+            }
+
             // ================= SEND TO MYSQL =================
 
             const mysqlResponse =
@@ -1162,13 +1188,9 @@ async function importStudents() {
                     body: JSON.stringify({
 
                         name: name,
-
                         roll: roll,
-
                         phone: phone,
-
                         branch: branch,
-
                         photo: photo || null
 
                     })
@@ -1210,7 +1232,9 @@ async function importStudents() {
             importedCount +
             " new students added to MySQL.\n" +
             existingCount +
-            " students already existed."
+            " students already existed.\n" +
+            deletedCount +
+            " deleted students skipped."
         );
 
         // Load students from MySQL
@@ -1226,7 +1250,6 @@ async function importStudents() {
         );
     }
 }
-
 
 
 
