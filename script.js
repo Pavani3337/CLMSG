@@ -1,4 +1,4 @@
-
+```javascript
 const API = "http://localhost:5000/api";
 
 let studentLoggedIn = null;
@@ -14,25 +14,25 @@ let currentReport = "";
 
 // ================= STORAGE =================
 
-function initStorage(){
+function initStorage() {
 
-    if(!localStorage.getItem("students")){
+    if (!localStorage.getItem("students")) {
         localStorage.setItem("students", JSON.stringify([]));
     }
 
-    if(!localStorage.getItem("books")){
+    if (!localStorage.getItem("books")) {
         localStorage.setItem("books", JSON.stringify([]));
     }
 
-    if(!localStorage.getItem("deletedStudents")){
+    if (!localStorage.getItem("deletedStudents")) {
         localStorage.setItem("deletedStudents", JSON.stringify([]));
     }
 
-    if(!localStorage.getItem("libraryLogs")){
+    if (!localStorage.getItem("libraryLogs")) {
         localStorage.setItem("libraryLogs", JSON.stringify([]));
     }
 
-    if(!localStorage.getItem("bookHistory")){
+    if (!localStorage.getItem("bookHistory")) {
         localStorage.setItem("bookHistory", JSON.stringify([]));
     }
 }
@@ -40,11 +40,11 @@ function initStorage(){
 
 // ================= PAGE LOAD =================
 
-window.onload = function(){
+window.onload = function () {
 
     initStorage();
 
-    if(sessionStorage.getItem("isLoggedIn") === "true"){
+    if (sessionStorage.getItem("isLoggedIn") === "true") {
 
         document.getElementById("loginPage").classList.add("hidden");
 
@@ -57,12 +57,15 @@ window.onload = function(){
 
 // ================= LOGIN =================
 
-function login(){
+function login() {
 
-    const id = document.getElementById("adminId").value.trim();
-    const password = document.getElementById("adminPassword").value.trim();
+    const id =
+        document.getElementById("adminId").value.trim();
 
-    if(id === ADMIN_ID && password === ADMIN_PASSWORD){
+    const password =
+        document.getElementById("adminPassword").value.trim();
+
+    if (id === ADMIN_ID && password === ADMIN_PASSWORD) {
 
         sessionStorage.setItem("isLoggedIn", "true");
 
@@ -72,7 +75,7 @@ function login(){
 
         alert("Login successful");
 
-    }else{
+    } else {
 
         alert("Invalid Admin ID or Password");
 
@@ -83,7 +86,7 @@ function login(){
 
 // ================= LOGOUT =================
 
-function logout(){
+function logout() {
 
     sessionStorage.removeItem("isLoggedIn");
 
@@ -94,7 +97,7 @@ function logout(){
 
 // ================= SECTIONS =================
 
-function hideSections(){
+function hideSections() {
 
     document.querySelectorAll(".section").forEach(section => {
 
@@ -105,19 +108,20 @@ function hideSections(){
 }
 
 
-function showSection(id){
+function showSection(id) {
 
     hideSections();
 
-    const section = document.getElementById(id);
+    const section =
+        document.getElementById(id);
 
-    if(section){
+    if (section) {
 
         section.classList.remove("hidden");
 
     }
 
-    if(id === "booksSection"){
+    if (id === "booksSection") {
 
         loadBooks();
 
@@ -128,20 +132,25 @@ function showSection(id){
 
 // ================= REGISTER STUDENT =================
 
-function registerStudent(){
+function registerStudent() {
 
-    const name = document.getElementById("studentName").value.trim();
+    const name =
+        document.getElementById("studentName").value.trim();
 
-    const roll = document.getElementById("studentRoll").value.trim();
+    const roll =
+        document.getElementById("studentRoll").value.trim();
 
-    const phone = document.getElementById("studentPhone").value.trim();
+    const phone =
+        document.getElementById("studentPhone").value.trim();
 
-    const branch = document.getElementById("studentBranch").value;
+    const branch =
+        document.getElementById("studentBranch").value;
 
-    const photoFile = document.getElementById("studentPhoto").files[0];
+    const photoFile =
+        document.getElementById("studentPhoto").files[0];
 
 
-    if(!name || !roll || !phone || !branch || !photoFile){
+    if (!name || !roll || !phone || !branch || !photoFile) {
 
         alert("Please fill all fields");
 
@@ -153,16 +162,17 @@ function registerStudent(){
     const reader = new FileReader();
 
 
-    reader.onload = function(e){
+    reader.onload = function (e) {
 
         let students =
             JSON.parse(localStorage.getItem("students")) || [];
 
 
-        const existing = students.find(s => s.roll === roll);
+        const existing =
+            students.find(s => s.roll === roll);
 
 
-        if(existing){
+        if (existing) {
 
             alert("Student already registered");
 
@@ -220,6 +230,8 @@ function registerStudent(){
 
 // ================= BOOKS =================
 
+// Add book to MySQL
+
 async function addBook() {
 
     const serial =
@@ -232,58 +244,88 @@ async function addBook() {
         document.getElementById("bookAuthor").value.trim();
 
     const totalCopies =
-        parseInt(document.getElementById("bookCopies").value);
+        parseInt(
+            document.getElementById("bookCopies").value
+        );
+
 
     if (!serial || !name || !author || !totalCopies) {
+
         alert("Fill all fields properly");
+
         return;
+
     }
+
 
     try {
 
-        const response = await fetch(API + "/books", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                serial: serial,
-                name: name,
-                author: author,
-                totalCopies: totalCopies
-            })
-        });
+        const response =
+            await fetch(API + "/books", {
 
-        const data = await response.json();
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    serial: serial,
+
+                    name: name,
+
+                    author: author,
+
+                    totalCopies: totalCopies
+
+                })
+
+            });
+
+
+        const data =
+            await response.json();
+
 
         if (!response.ok) {
+
             alert(data.error);
+
             return;
+
         }
+
 
         alert("Book Added Successfully");
 
+
         document.getElementById("bookSerial").value = "";
+
         document.getElementById("bookName").value = "";
+
         document.getElementById("bookAuthor").value = "";
+
         document.getElementById("bookCopies").value = "";
 
+
         loadBooks();
+
 
     } catch (error) {
 
         console.error(error);
+
         alert("Backend is not running");
 
     }
+
 }
 
 
-
-
-
-
 // ================= LOAD BOOKS =================
+
+// Load books from MySQL
 
 async function loadBooks() {
 
@@ -292,18 +334,33 @@ async function loadBooks() {
         const response =
             await fetch(API + "/books");
 
+
         const books =
             await response.json();
 
+
+        if (!response.ok) {
+
+            alert(books.error || "Failed to load books");
+
+            return;
+
+        }
+
+
         renderBooks(books);
+
 
     } catch (error) {
 
         console.error(error);
+
         alert("Failed to load books");
 
     }
+
 }
+
 
 // ================= RENDER BOOKS =================
 
@@ -311,10 +368,12 @@ function renderBooks(books) {
 
     let html = "";
 
+
     books.forEach(book => {
 
         const issued =
             book.total_copies - book.available_copies;
+
 
         html += `
         <tr>
@@ -346,50 +405,63 @@ function renderBooks(books) {
 
     });
 
+
     document.getElementById("booksTable").innerHTML = html;
+
 }
 
 
-
 // ================= SEARCH BOOK =================
+
+// Search books from MySQL
 
 async function searchBook() {
 
     const searchText =
         document
-        .getElementById("bookSearchBox")
-        .value
-        .toLowerCase();
+            .getElementById("bookSearchBox")
+            .value
+            .toLowerCase();
+
 
     try {
 
         const response =
             await fetch(API + "/books");
 
+
         const books =
             await response.json();
 
+
         const filtered =
             books.filter(book =>
-                book.name.toLowerCase().includes(searchText)
+                book.name
+                    .toLowerCase()
+                    .includes(searchText)
             );
 
+
         renderBooks(filtered);
+
 
     } catch (error) {
 
         console.error(error);
 
-    }
-}
+        alert("Failed to search books");
 
+    }
+
+}
 
 
 // ================= BOOK HISTORY =================
 
-function showBookHistory(serial){
+function showBookHistory(serial) {
 
     hideSections();
+
 
     document
         .getElementById("bookHistorySection")
@@ -397,11 +469,15 @@ function showBookHistory(serial){
 
 
     const history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
 
 
     const records =
-        history.filter(h => h.serial === serial);
+        history.filter(
+            h => h.serial === serial
+        );
 
 
     const table =
@@ -413,7 +489,8 @@ function showBookHistory(serial){
 
     records.forEach((record, index) => {
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
 
 
         row.innerHTML = `
@@ -442,48 +519,62 @@ function showBookHistory(serial){
 
 // ================= DELETE BOOK =================
 
+// Delete book from MySQL
+
 async function deleteBook(serial) {
 
     if (!confirm("Delete this book?")) {
+
         return;
+
     }
+
 
     try {
 
         const response =
             await fetch(
-                API + "/books/" + encodeURIComponent(serial),
+                API + "/books/" +
+                encodeURIComponent(serial),
                 {
                     method: "DELETE"
                 }
             );
 
+
         const data =
             await response.json();
 
+
         if (!response.ok) {
+
             alert(data.error);
+
             return;
+
         }
+
 
         alert("Book Deleted Successfully");
 
+
         loadBooks();
+
 
     } catch (error) {
 
         console.error(error);
+
         alert("Backend is not running");
 
     }
+
 }
-
-
 
 
 // ================= LOAD STUDENTS =================
 
-function loadStudents(branch){
+function loadStudents(branch) {
 
     currentBranch = branch;
 
@@ -497,12 +588,15 @@ function loadStudents(branch){
 
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     const filtered =
-        students.filter(student =>
-            student.branch === branch
+        students.filter(
+            student =>
+                student.branch === branch
         );
 
 
@@ -513,7 +607,7 @@ function loadStudents(branch){
 
 // ================= RENDER STUDENTS =================
 
-function renderStudents(students){
+function renderStudents(students) {
 
     const table =
         document.getElementById("studentsTable");
@@ -524,7 +618,8 @@ function renderStudents(students){
 
     students.forEach((student, index) => {
 
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
 
 
         row.innerHTML = `
@@ -567,17 +662,20 @@ function renderStudents(students){
 
 // ================= SEARCH STUDENT =================
 
-function searchStudent(){
+function searchStudent() {
 
     const search =
-        document.getElementById("searchBox")
-        .value
-        .trim()
-        .toLowerCase();
+        document
+            .getElementById("searchBox")
+            .value
+            .trim()
+            .toLowerCase();
 
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     const filtered =
@@ -585,7 +683,9 @@ function searchStudent(){
 
             student.branch === currentBranch &&
 
-            student.roll.toLowerCase().includes(search)
+            student.roll
+                .toLowerCase()
+                .includes(search)
 
         );
 
@@ -597,12 +697,12 @@ function searchStudent(){
 
 // ================= STUDENT PROFILE =================
 
-function showProfile(studentId){
+function showProfile(studentId) {
 
-    if(
+    if (
         sessionStorage.getItem("isLoggedIn") !== "true" &&
         !studentLoggedIn
-    ){
+    ) {
 
         alert("Admin login required");
 
@@ -612,14 +712,18 @@ function showProfile(studentId){
 
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     currentStudent =
-        students.find(s => s.id === studentId);
+        students.find(
+            s => s.id === studentId
+        );
 
 
-    if(!currentStudent){
+    if (!currentStudent) {
 
         alert("Student not found");
 
@@ -664,7 +768,7 @@ function showProfile(studentId){
 
 // ================= LOAD ISSUED BOOKS =================
 
-function loadIssuedBooks(){
+function loadIssuedBooks() {
 
     const table =
         document.getElementById("issuedTable");
@@ -673,7 +777,7 @@ function loadIssuedBooks(){
     table.innerHTML = "";
 
 
-    if(!currentStudent){
+    if (!currentStudent) {
 
         return;
 
@@ -684,58 +788,61 @@ function loadIssuedBooks(){
         currentStudent.issuedBooks || [];
 
 
-    currentStudent.issuedBooks.forEach((book, index) => {
+    currentStudent.issuedBooks.forEach(
+        (book, index) => {
 
-        const row = document.createElement("tr");
-
-
-        row.innerHTML = `
-
-            <td>${index + 1}</td>
-
-            <td>${book.bookName}</td>
-
-            <td>${book.author}</td>
-
-            <td>${book.issueDate}</td>
-
-            <td>${book.dueDate}</td>
-
-            <td>${book.status}</td>
-
-            <td>${book.returnDate || "-"}</td>
-
-            <td>
-
-                ${
-                    book.status === "Issued"
-
-                    ?
-
-                    `<button onclick="returnBook(${index})">
-                        Return
-                    </button>`
-
-                    :
-
-                    "-"
-                }
-
-            </td>
-
-        `;
+            const row =
+                document.createElement("tr");
 
 
-        table.appendChild(row);
+            row.innerHTML = `
 
-    });
+                <td>${index + 1}</td>
+
+                <td>${book.bookName}</td>
+
+                <td>${book.author}</td>
+
+                <td>${book.issueDate}</td>
+
+                <td>${book.dueDate}</td>
+
+                <td>${book.status}</td>
+
+                <td>${book.returnDate || "-"}</td>
+
+                <td>
+
+                    ${
+                        book.status === "Issued"
+
+                        ?
+
+                        `<button onclick="returnBook(${index})">
+                            Return
+                        </button>`
+
+                        :
+
+                        "-"
+                    }
+
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        }
+    );
 
 }
 
 
 // ================= SHOW ISSUE BOOK =================
 
-function showIssueBook(){
+function showIssueBook() {
 
     document
         .getElementById("issueArea")
@@ -743,7 +850,9 @@ function showIssueBook(){
 
 
     document.getElementById("issueDate").value =
-        new Date().toISOString().split("T")[0];
+        new Date()
+            .toISOString()
+            .split("T")[0];
 
 
     loadBookOptions();
@@ -753,10 +862,12 @@ function showIssueBook(){
 
 // ================= LOAD BOOK OPTIONS =================
 
-function loadBookOptions(){
+function loadBookOptions() {
 
     const books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
 
 
     const select =
@@ -767,14 +878,18 @@ function loadBookOptions(){
 
 
     books
-        .filter(book => book.availableCopies > 0)
+        .filter(
+            book =>
+                book.availableCopies > 0
+        )
         .forEach(book => {
 
             const option =
                 document.createElement("option");
 
 
-            option.value = book.serial;
+            option.value =
+                book.serial;
 
 
             option.textContent =
@@ -795,16 +910,19 @@ function loadBookOptions(){
 
 // ================= SEARCH BOOKS =================
 
-function searchBooks(){
+function searchBooks() {
 
     const search =
-        document.getElementById("bookSearch")
-        .value
-        .toLowerCase();
+        document
+            .getElementById("bookSearch")
+            .value
+            .toLowerCase();
 
 
     const books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
 
 
     const select =
@@ -816,8 +934,13 @@ function searchBooks(){
 
     books
         .filter(book =>
+
             book.availableCopies > 0 &&
-            book.name.toLowerCase().includes(search)
+
+            book.name
+                .toLowerCase()
+                .includes(search)
+
         )
         .forEach(book => {
 
@@ -825,7 +948,8 @@ function searchBooks(){
                 document.createElement("option");
 
 
-            option.value = book.serial;
+            option.value =
+                book.serial;
 
 
             option.textContent =
@@ -846,9 +970,9 @@ function searchBooks(){
 
 // ================= ISSUE BOOK =================
 
-function issueBook(){
+function issueBook() {
 
-    if(!currentStudent){
+    if (!currentStudent) {
 
         alert("Select a student first");
 
@@ -869,7 +993,7 @@ function issueBook(){
         document.getElementById("dueDate").value;
 
 
-    if(!serial || !issueDate || !dueDate){
+    if (!serial || !issueDate || !dueDate) {
 
         alert("Please select book and dates");
 
@@ -879,14 +1003,19 @@ function issueBook(){
 
 
     let books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
 
 
     const selectedBook =
-        books.find(book => book.serial === serial);
+        books.find(
+            book =>
+                book.serial === serial
+        );
 
 
-    if(!selectedBook){
+    if (!selectedBook) {
 
         alert("Book not found");
 
@@ -895,7 +1024,7 @@ function issueBook(){
     }
 
 
-    if(selectedBook.availableCopies <= 0){
+    if (selectedBook.availableCopies <= 0) {
 
         alert("Book not available");
 
@@ -913,63 +1042,87 @@ function issueBook(){
 
     currentStudent.issuedBooks.push({
 
-        serial: selectedBook.serial,
+        serial:
+            selectedBook.serial,
 
-        bookName: selectedBook.name,
+        bookName:
+            selectedBook.name,
 
-        author: selectedBook.author,
+        author:
+            selectedBook.author,
 
-        issueDate: issueDate,
+        issueDate:
+            issueDate,
 
-        dueDate: dueDate,
+        dueDate:
+            dueDate,
 
-        returnDate: "",
+        returnDate:
+            "",
 
-        status: "Issued"
+        status:
+            "Issued"
 
     });
 
 
     let logs =
-        JSON.parse(localStorage.getItem("libraryLogs")) || [];
+        JSON.parse(
+            localStorage.getItem("libraryLogs")
+        ) || [];
 
 
     logs.push({
 
-        roll: currentStudent.roll,
+        roll:
+            currentStudent.roll,
 
-        studentName: currentStudent.name,
+        studentName:
+            currentStudent.name,
 
-        serial: selectedBook.serial,
+        serial:
+            selectedBook.serial,
 
-        bookName: selectedBook.name,
+        bookName:
+            selectedBook.name,
 
-        date: issueDate,
+        date:
+            issueDate,
 
-        type: "Issued"
+        type:
+            "Issued"
 
     });
 
 
     let history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
 
 
     history.push({
 
-        roll: currentStudent.roll,
+        roll:
+            currentStudent.roll,
 
-        studentName: currentStudent.name,
+        studentName:
+            currentStudent.name,
 
-        serial: selectedBook.serial,
+        serial:
+            selectedBook.serial,
 
-        bookName: selectedBook.name,
+        bookName:
+            selectedBook.name,
 
-        issueDate: issueDate,
+        issueDate:
+            issueDate,
 
-        returnDate: "",
+        returnDate:
+            "",
 
-        status: "Issued"
+        status:
+            "Issued"
 
     });
 
@@ -977,12 +1130,13 @@ function issueBook(){
     localStorage.setItem(
         "students",
         JSON.stringify(
-            JSON.parse(localStorage.getItem("students"))
-                .map(s =>
-                    s.id === currentStudent.id
-                        ? currentStudent
-                        : s
-                )
+            JSON.parse(
+                localStorage.getItem("students")
+            ).map(s =>
+                s.id === currentStudent.id
+                    ? currentStudent
+                    : s
+            )
         )
     );
 
@@ -1020,9 +1174,9 @@ function issueBook(){
 
 // ================= RETURN BOOK =================
 
-function returnBook(bookIndex){
+function returnBook(bookIndex) {
 
-    if(!currentStudent){
+    if (!currentStudent) {
 
         return;
 
@@ -1033,7 +1187,7 @@ function returnBook(bookIndex){
         currentStudent.issuedBooks[bookIndex];
 
 
-    if(!book || book.status !== "Issued"){
+    if (!book || book.status !== "Issued") {
 
         return;
 
@@ -1041,18 +1195,24 @@ function returnBook(bookIndex){
 
 
     const returnDate =
-        new Date().toISOString().split("T")[0];
+        new Date()
+            .toISOString()
+            .split("T")[0];
 
 
     let books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        JSON.parse(
+            localStorage.getItem("books")
+        ) || [];
 
 
     const selectedBook =
-        books.find(b => b.serial === book.serial);
+        books.find(
+            b => b.serial === book.serial
+        );
 
 
-    if(selectedBook){
+    if (selectedBook) {
 
         selectedBook.availableCopies++;
 
@@ -1065,7 +1225,9 @@ function returnBook(bookIndex){
 
 
     let history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
 
 
     const historyRecord =
@@ -1080,7 +1242,7 @@ function returnBook(bookIndex){
         );
 
 
-    if(historyRecord){
+    if (historyRecord) {
 
         historyRecord.status = "Returned";
 
@@ -1090,22 +1252,30 @@ function returnBook(bookIndex){
 
 
     let logs =
-        JSON.parse(localStorage.getItem("libraryLogs")) || [];
+        JSON.parse(
+            localStorage.getItem("libraryLogs")
+        ) || [];
 
 
     logs.push({
 
-        roll: currentStudent.roll,
+        roll:
+            currentStudent.roll,
 
-        studentName: currentStudent.name,
+        studentName:
+            currentStudent.name,
 
-        serial: book.serial,
+        serial:
+            book.serial,
 
-        bookName: book.bookName,
+        bookName:
+            book.bookName,
 
-        date: returnDate,
+        date:
+            returnDate,
 
-        type: "Returned"
+        type:
+            "Returned"
 
     });
 
@@ -1119,12 +1289,13 @@ function returnBook(bookIndex){
     localStorage.setItem(
         "students",
         JSON.stringify(
-            JSON.parse(localStorage.getItem("students"))
-                .map(s =>
-                    s.id === currentStudent.id
-                        ? currentStudent
-                        : s
-                )
+            JSON.parse(
+                localStorage.getItem("students")
+            ).map(s =>
+                s.id === currentStudent.id
+                    ? currentStudent
+                    : s
+            )
         )
     );
 
@@ -1151,7 +1322,7 @@ function returnBook(bookIndex){
 
 // ================= UPDATE BOOK STATUS =================
 
-function updateBookStatus(){
+function updateBookStatus() {
 
     loadIssuedBooks();
 
@@ -1160,7 +1331,7 @@ function updateBookStatus(){
 
 // ================= HANDLE RETURN BOOK =================
 
-function handleReturnBook(){
+function handleReturnBook() {
 
     loadIssuedBooks();
 
@@ -1169,7 +1340,7 @@ function handleReturnBook(){
 
 // ================= UPDATE RETURN DATE =================
 
-function updateReturnDate(){
+function updateReturnDate() {
 
     loadIssuedBooks();
 
@@ -1178,9 +1349,9 @@ function updateReturnDate(){
 
 // ================= DELETE STUDENT =================
 
-function deleteStudent(studentId){
+function deleteStudent(studentId) {
 
-    if(!confirm("Delete this student?")){
+    if (!confirm("Delete this student?")) {
 
         return;
 
@@ -1188,14 +1359,18 @@ function deleteStudent(studentId){
 
 
     let students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     const student =
-        students.find(s => s.id === studentId);
+        students.find(
+            s => s.id === studentId
+        );
 
 
-    if(!student){
+    if (!student) {
 
         return;
 
@@ -1212,7 +1387,9 @@ function deleteStudent(studentId){
 
 
     students =
-        students.filter(s => s.id !== studentId);
+        students.filter(
+            s => s.id !== studentId
+        );
 
 
     localStorage.setItem(
@@ -1236,9 +1413,9 @@ function deleteStudent(studentId){
 //                    QR CODE FEATURE
 // =====================================================
 
-function generateStudentQR(roll){
+function generateStudentQR(roll) {
 
-    if(!roll){
+    if (!roll) {
 
         alert("Student roll number not found");
 
@@ -1252,10 +1429,11 @@ function generateStudentQR(roll){
         encodeURIComponent(roll);
 
 
-    const qrWindow = window.open("", "_blank");
+    const qrWindow =
+        window.open("", "_blank");
 
 
-    if(!qrWindow){
+    if (!qrWindow) {
 
         alert("Please allow pop-ups for this website.");
 
@@ -1278,61 +1456,61 @@ function generateStudentQR(roll){
 
 <style>
 
-body{
+body {
 
-    font-family:Arial,sans-serif;
+    font-family: Arial, sans-serif;
 
-    text-align:center;
+    text-align: center;
 
-    padding:30px;
-
-}
-
-.qr-box{
-
-    max-width:400px;
-
-    margin:auto;
-
-    padding:25px;
-
-    border:1px solid #ddd;
-
-    border-radius:12px;
+    padding: 30px;
 
 }
 
-#qrcode{
+.qr-box {
 
-    margin:25px auto;
+    max-width: 400px;
 
-    width:256px;
+    margin: auto;
 
-}
+    padding: 25px;
 
-button{
+    border: 1px solid #ddd;
 
-    padding:10px 20px;
-
-    margin:5px;
-
-    border:none;
-
-    border-radius:5px;
-
-    background:#2563eb;
-
-    color:white;
-
-    cursor:pointer;
+    border-radius: 12px;
 
 }
 
-@media print{
+#qrcode {
 
-    button{
+    margin: 25px auto;
 
-        display:none;
+    width: 256px;
+
+}
+
+button {
+
+    padding: 10px 20px;
+
+    margin: 5px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: #2563eb;
+
+    color: white;
+
+    cursor: pointer;
+
+}
+
+@media print {
+
+    button {
+
+        display: none;
 
     }
 
@@ -1354,7 +1532,9 @@ button{
 
     <div id="qrcode"></div>
 
-    <p>Scan this QR code to open the student library profile.</p>
+    <p>
+        Scan this QR code to open the student library profile.
+    </p>
 
     <button onclick="window.print()">
         Print QR
@@ -1380,7 +1560,7 @@ new QRCode(document.getElementById("qrcode"), {
 
 </html>
 
-    `);
+`);
 
 
     qrWindow.document.close();
@@ -1390,13 +1570,13 @@ new QRCode(document.getElementById("qrcode"), {
 
 // ================= IMPORT STUDENTS =================
 
-async function importStudents(){
+async function importStudents() {
 
     const url =
         "https://script.google.com/macros/s/AKfycbz9cte0vWjY8E5Jc2ird5J6pLtX1MI0fXkBsHYzEj6BBRkgE_ZPdM5OsZ4t5OflVG1M/exec";
 
 
-    try{
+    try {
 
         const response =
             await fetch(url);
@@ -1406,7 +1586,7 @@ async function importStudents(){
             await response.json();
 
 
-        if(!Array.isArray(data)){
+        if (!Array.isArray(data)) {
 
             alert("Invalid student data");
 
@@ -1416,7 +1596,9 @@ async function importStudents(){
 
 
         let students =
-            JSON.parse(localStorage.getItem("students")) || [];
+            JSON.parse(
+                localStorage.getItem("students")
+            ) || [];
 
 
         let importedCount = 0;
@@ -1424,7 +1606,7 @@ async function importStudents(){
 
         data.forEach(row => {
 
-            if(!row || row.length < 5){
+            if (!row || row.length < 5) {
 
                 return;
 
@@ -1451,17 +1633,19 @@ async function importStudents(){
                 String(row[5] || "").trim();
 
 
-            if(!name || !roll){
+            if (!name || !roll) {
 
                 return;
 
             }
 
 
-            if(photo.includes("id=")){
+            if (photo.includes("id=")) {
 
                 const id =
-                    photo.split("id=")[1].split("&")[0];
+                    photo
+                        .split("id=")[1]
+                        .split("&")[0];
 
 
                 photo =
@@ -1473,39 +1657,53 @@ async function importStudents(){
 
 
             const existing =
-                students.find(s => s.roll === roll);
+                students.find(
+                    s => s.roll === roll
+                );
 
 
-            if(existing){
+            if (existing) {
 
-                existing.name = name;
+                existing.name =
+                    name;
 
-                existing.phone = phone;
+                existing.phone =
+                    phone;
 
-                existing.branch = branch;
+                existing.branch =
+                    branch;
 
-                existing.photo = photo || existing.photo;
+                existing.photo =
+                    photo || existing.photo;
 
                 existing.issuedBooks =
                     existing.issuedBooks || [];
 
-            }else{
+            } else {
 
                 students.push({
 
-                    id: Date.now() + Math.random(),
+                    id:
+                        Date.now() +
+                        Math.random(),
 
-                    name: name,
+                    name:
+                        name,
 
-                    roll: roll,
+                    roll:
+                        roll,
 
-                    phone: phone,
+                    phone:
+                        phone,
 
-                    branch: branch,
+                    branch:
+                        branch,
 
-                    photo: photo,
+                    photo:
+                        photo,
 
-                    issuedBooks: []
+                    issuedBooks:
+                        []
 
                 });
 
@@ -1529,13 +1727,14 @@ async function importStudents(){
         );
 
 
-        if(currentBranch){
+        if (currentBranch) {
 
             loadStudents(currentBranch);
 
         }
 
-    }catch(error){
+
+    } catch (error) {
 
         console.error(error);
 
@@ -1550,27 +1749,39 @@ async function importStudents(){
 
 // ================= STUDENT OTP =================
 
-function sendStudentOTP(){
+function sendStudentOTP() {
 
     const roll =
-        document.getElementById("studentLoginRoll").value.trim();
+        document
+            .getElementById("studentLoginRoll")
+            .value
+            .trim();
+
 
     const phone =
-        document.getElementById("studentLoginPhone").value.trim();
+        document
+            .getElementById("studentLoginPhone")
+            .value
+            .trim();
 
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     const student =
         students.find(s =>
+
             s.roll === roll &&
+
             s.phone === phone
+
         );
 
 
-    if(!student){
+    if (!student) {
 
         alert("Student not found");
 
@@ -1580,15 +1791,19 @@ function sendStudentOTP(){
 
 
     const otp =
-        Math.floor(1000 + Math.random() * 9000)
-        .toString();
+        Math.floor(
+            1000 +
+            Math.random() * 9000
+        ).toString();
 
 
     otpStore = {
 
-        roll: roll,
+        roll:
+            roll,
 
-        otp: otp
+        otp:
+            otp
 
     };
 
@@ -1600,13 +1815,16 @@ function sendStudentOTP(){
 
 // ================= VERIFY OTP =================
 
-function verifyStudentOTP(){
+function verifyStudentOTP() {
 
     const otp =
-        document.getElementById("studentOTP").value.trim();
+        document
+            .getElementById("studentOTP")
+            .value
+            .trim();
 
 
-    if(!otpStore){
+    if (!otpStore) {
 
         alert("Please request OTP first");
 
@@ -1615,7 +1833,7 @@ function verifyStudentOTP(){
     }
 
 
-    if(otp !== otpStore.otp){
+    if (otp !== otpStore.otp) {
 
         alert("Invalid OTP");
 
@@ -1625,14 +1843,18 @@ function verifyStudentOTP(){
 
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
 
     studentLoggedIn =
-        students.find(s => s.roll === otpStore.roll);
+        students.find(
+            s => s.roll === otpStore.roll
+        );
 
 
-    if(!studentLoggedIn){
+    if (!studentLoggedIn) {
 
         alert("Student not found");
 
@@ -1651,9 +1873,9 @@ function verifyStudentOTP(){
 
 // ================= STUDENT REPORT =================
 
-function downloadMyReport(){
+function downloadMyReport() {
 
-    if(!studentLoggedIn){
+    if (!studentLoggedIn) {
 
         alert("Please login first");
 
@@ -1663,12 +1885,16 @@ function downloadMyReport(){
 
 
     const history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
 
 
     const myRecords =
-        history.filter(h =>
-            h.roll === studentLoggedIn.roll
+        history.filter(
+            h =>
+                h.roll ===
+                studentLoggedIn.roll
         );
 
 
@@ -1694,27 +1920,31 @@ function downloadMyReport(){
         "\n\n";
 
 
-    myRecords.forEach((record, index) => {
+    myRecords.forEach(
+        (record, index) => {
 
-        content +=
-            (index + 1) +
-            ". " +
-            record.bookName +
-            " | " +
-            record.issueDate +
-            " | " +
-            (record.returnDate || "-") +
-            " | " +
-            record.status +
-            "\n";
+            content +=
+                (index + 1) +
+                ". " +
+                record.bookName +
+                " | " +
+                record.issueDate +
+                " | " +
+                (record.returnDate || "-") +
+                " | " +
+                record.status +
+                "\n";
 
-    });
+        }
+    );
 
 
     const blob =
         new Blob(
             [content],
-            {type:"text/plain"}
+            {
+                type: "text/plain"
+            }
         );
 
 
@@ -1734,3 +1964,4 @@ function downloadMyReport(){
     link.click();
 
 }
+```
