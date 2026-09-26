@@ -519,7 +519,6 @@ function renderStudents(students) {
             document.createElement("tr");
 
         row.innerHTML = `
-
             <td>${index + 1}</td>
 
             <td>
@@ -530,7 +529,7 @@ function renderStudents(students) {
 
             <td>${student.roll}</td>
 
-            <td>${student.phone}</td>
+            <td>${student.phone || "-"}</td>
 
             <td>
 
@@ -540,18 +539,16 @@ function renderStudents(students) {
                 </button>
 
                 <button
-                    onclick="deleteStudent(${student.roll})">
+                    onclick="deleteStudent(${student.id})">
                     Delete
                 </button>
 
             </td>
-
         `;
 
         table.appendChild(row);
     });
 }
-
 
 // ================= SEARCH STUDENT =================
 
@@ -919,7 +916,6 @@ function updateReturnDate() {
 
 // ================= DELETE STUDENT =================
 
-// ================= DELETE STUDENT =================
 async function deleteStudent(studentId) {
 
     if (!confirm("Delete this student?")) {
@@ -928,14 +924,16 @@ async function deleteStudent(studentId) {
 
     try {
 
-        const response = await fetch(
-            API + "/students/" + studentId,
-            {
-                method: "DELETE"
-            }
-        );
+        const response =
+            await fetch(
+                API + "/students/" + studentId,
+                {
+                    method: "DELETE"
+                }
+            );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
@@ -949,20 +947,18 @@ async function deleteStudent(studentId) {
 
         alert("Student Deleted Successfully");
 
-        loadStudents(currentBranch);
+        await loadStudents(currentBranch);
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Unable to delete student. " +
-            "Check the backend."
+            "Unable to delete student.\n" +
+            "Make sure the backend is running."
         );
     }
 }
-
-
 
 
 // =====================================================
