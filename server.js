@@ -863,6 +863,44 @@ app.post("/api/students/import", async (req, res) => {
 
 
 
+// DELETE STUDENT
+app.delete("/api/students/:id", async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+
+        const [result] = await pool.query(
+            "DELETE FROM students WHERE id = ?",
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: "Student not found"
+            });
+        }
+
+        res.json({
+            message: "Student deleted successfully"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to delete student"
+        });
+    }
+});
+
+
+
+
+
+
+
 
 // ================= START SERVER =================
 
@@ -1236,51 +1274,6 @@ app.get("/api/reports/library", async (req, res) => {
 
         res.status(500).json({
             error: "Failed to generate report"
-        });
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-// DELETE STUDENT
-
-app.delete("/api/students/:id", async (req, res) => {
-
-    const { id } = req.params;
-
-    try {
-
-        const [result] = await pool.query(
-            "DELETE FROM students WHERE id = ?",
-            [id]
-        );
-
-        if (result.affectedRows === 0) {
-
-            return res.status(404).json({
-                error: "Student not found"
-            });
-        }
-
-        res.json({
-            message: "Student deleted successfully"
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            error: "Failed to delete student"
         });
     }
 });
