@@ -841,12 +841,11 @@ async function searchBooks() {
 // Temporary localStorage version.
 // This will be replaced by MySQL transaction API next.
 
-function issueBook() {
+
+async function issueBook() {
 
     if (!currentStudent) {
-
         alert("Select a student first");
-
         return;
     }
 
@@ -860,17 +859,62 @@ function issueBook() {
         document.getElementById("dueDate").value;
 
     if (!serial || !issueDate || !dueDate) {
-
         alert("Please select book and dates");
-
         return;
     }
 
-    alert(
-        "The Issue Book API will be connected next. " +
-        "Do not use this function yet."
-    );
+    try {
+
+        const response = await fetch(
+            API + "/transactions/issue",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    roll: currentStudent.roll,
+                    serial: serial,
+                    issueDate: issueDate,
+                    dueDate: dueDate
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.error ||
+                "Failed to issue book"
+            );
+
+            return;
+        }
+
+        alert("Book issued successfully");
+
+        document.getElementById("issueArea")
+            .classList.add("hidden");
+
+        await loadBooks();
+
+        await showProfile(currentStudent.roll);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to issue book.\n" +
+            "Make sure the backend is running."
+        );
+    }
 }
+
 
 
 // ================= RETURN BOOK =================
