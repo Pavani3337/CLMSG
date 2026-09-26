@@ -1,3 +1,6 @@
+
+const API = "http://localhost:5000/api";
+
 let studentLoggedIn = null;
 let otpStore = null;
 
@@ -217,7 +220,7 @@ function registerStudent(){
 
 // ================= BOOKS =================
 
-function addBook(){
+async function addBook() {
 
     const serial =
         document.getElementById("bookSerial").value.trim();
@@ -231,115 +234,106 @@ function addBook(){
     const totalCopies =
         parseInt(document.getElementById("bookCopies").value);
 
-
-    if(!serial || !name || !author || !totalCopies){
-
-        alert("Please fill all book details");
-
+    if (!serial || !name || !author || !totalCopies) {
+        alert("Fill all fields properly");
         return;
-
     }
 
+    try {
 
-    let books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        const response = await fetch(API + "/books", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                serial: serial,
+                name: name,
+                author: author,
+                totalCopies: totalCopies
+            })
+        });
 
+        const data = await response.json();
 
-    if(books.some(b => b.serial === serial)){
+        if (!response.ok) {
+            alert(data.error);
+            return;
+        }
 
-        alert("Book serial already exists");
+        alert("Book Added Successfully");
 
-        return;
+        document.getElementById("bookSerial").value = "";
+        document.getElementById("bookName").value = "";
+        document.getElementById("bookAuthor").value = "";
+        document.getElementById("bookCopies").value = "";
+
+        loadBooks();
+
+    } catch (error) {
+
+        console.error(error);
+        alert("Backend is not running");
 
     }
-
-
-    books.push({
-
-        serial: serial,
-
-        name: name,
-
-        author: author,
-
-        totalCopies: totalCopies,
-
-        availableCopies: totalCopies
-
-    });
-
-
-    localStorage.setItem(
-        "books",
-        JSON.stringify(books)
-    );
-
-
-    alert("Book added successfully");
-
-
-    document.getElementById("bookSerial").value = "";
-
-    document.getElementById("bookName").value = "";
-
-    document.getElementById("bookAuthor").value = "";
-
-    document.getElementById("bookCopies").value = "";
-
-
-    loadBooks();
-
 }
+
+
+
+
 
 
 // ================= LOAD BOOKS =================
 
-function loadBooks(){
+async function loadBooks() {
 
-    const books =
-        JSON.parse(localStorage.getItem("books")) || [];
+    try {
 
-    renderBooks(books);
+        const response =
+            await fetch(API + "/books");
 
+        const books =
+            await response.json();
+
+        renderBooks(books);
+
+    } catch (error) {
+
+        console.error(error);
+        alert("Failed to load books");
+
+    }
 }
-
 
 // ================= RENDER BOOKS =================
 
-function renderBooks(books){
+function renderBooks(books) {
 
-    const table =
-        document.getElementById("booksTable");
-
-    table.innerHTML = "";
-
+    let html = "";
 
     books.forEach(book => {
 
         const issued =
-            book.totalCopies - book.availableCopies;
+            book.total_copies - book.available_copies;
 
-
-        const row = document.createElement("tr");
-
-
-        row.innerHTML = `
+        html += `
+        <tr>
 
             <td>${book.serial}</td>
 
-            <td>
-                <button onclick="showBookHistory('${book.serial}')">
-                    ${book.name}
-                </button>
+            <td
+                onclick="showBookHistory('${book.serial}')"
+                style="cursor:pointer;color:blue;">
+                ${book.name}
             </td>
 
-            <td>${book.author}</td>
+            <td>${book.author || "-"}</td>
 
-            <td>${book.totalCopies}</td>
+            <td>${book.total_copies}</td>
 
             <td>${issued}</td>
 
-            <td>${book.availableCopies}</td>
+            <td>${book.available_copies}</td>
 
             <td>
                 <button onclick="deleteBook('${book.serial}')">
@@ -347,40 +341,48 @@ function renderBooks(books){
                 </button>
             </td>
 
+        </tr>
         `;
-
-
-        table.appendChild(row);
 
     });
 
+    document.getElementById("booksTable").innerHTML = html;
 }
+
 
 
 // ================= SEARCH BOOK =================
 
-function searchBook(){
+async function searchBook() {
 
-    const search =
-        document.getElementById("bookSearchBox")
+    const searchText =
+        document
+        .getElementById("bookSearchBox")
         .value
         .toLowerCase();
 
+    try {
 
-    const books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        const response =
+            await fetch(API + "/books");
 
+        const books =
+            await response.json();
 
-    const filtered = books.filter(book =>
+        const filtered =
+            books.filter(book =>
+                book.name.toLowerCase().includes(searchText)
+            );
 
-        book.name.toLowerCase().includes(search)
+        renderBooks(filtered);
 
-    );
+    } catch (error) {
 
+        console.error(error);
 
-    renderBooks(filtered);
-
+    }
 }
+
 
 
 // ================= BOOK HISTORY =================
@@ -440,32 +442,43 @@ function showBookHistory(serial){
 
 // ================= DELETE BOOK =================
 
-function deleteBook(serial){
+async function deleteBook(serial) {
 
-    if(!confirm("Delete this book?")){
-
+    if (!confirm("Delete this book?")) {
         return;
-
     }
 
+    try {
 
-    let books =
-        JSON.parse(localStorage.getItem("books")) || [];
+        const response =
+            await fetch(
+                API + "/books/" + encodeURIComponent(serial),
+                {
+                    method: "DELETE"
+                }
+            );
 
+        const data =
+            await response.json();
 
-    books =
-        books.filter(book => book.serial !== serial);
+        if (!response.ok) {
+            alert(data.error);
+            return;
+        }
 
+        alert("Book Deleted Successfully");
 
-    localStorage.setItem(
-        "books",
-        JSON.stringify(books)
-    );
+        loadBooks();
 
+    } catch (error) {
 
-    loadBooks();
+        console.error(error);
+        alert("Backend is not running");
 
+    }
 }
+
+
 
 
 // ================= LOAD STUDENTS =================
