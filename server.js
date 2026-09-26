@@ -562,6 +562,308 @@ app.post("/api/transactions/issue", async (req, res) => {
 
 
 
+// ================= RETURN BOOK =================
+
+app.post("/api/transactions/return", async (req, res) => {
+
+    const { transactionId, returnDate } = req.body;
+
+    if (!transactionId || !returnDate) {
+        return res.status(400).json({
+            error: "Transaction ID and return date are required"
+        });
+    }
+
+    const connection = await pool.getConnection();
+
+    try {
+
+        await connection.beginTransaction();
+
+        // Find and lock the transaction
+        const [transactions] = await connection.query(
+            `SELECT bt.id, bt.student_id, bt.book_id,
+                    bt.issue_date, bt.due_date,
+                    s.name AS student_name,
+                    s.roll,
+                    b.name AS book_name,
+                    b.serial
+             FROM book_transactions bt
+             JOIN students s ON bt.student_id = s.id
+             JOIN books b ON bt.book_id = b.id
+             WHERE bt.id = ?
+             AND bt.status = 'Issued'
+             FOR UPDATE`,
+            [transactionId]
+        );
+
+        if (transactions.length === 0) {
+
+            await connection.rollback();
+
+            return res.status(404).json({
+                error: "Active book transaction not found"
+            });
+
+        }
+
+        const transaction = transactions[0];
+
+        // Update transaction
+        await connection.query(
+            `UPDATE book_transactions
+             SET return_date = ?,
+                 status = 'Returned'
+             WHERE id = ?`,
+            [returnDate, transactionId]
+        );
+
+        // Increase available copies
+        await connection.query(
+            `UPDATE books
+             SET available_copies = available_copies + 1
+             WHERE id = ?`,
+            [transaction.book_id]
+        );
+
+        // Add library log
+        await connection.query(
+            `INSERT INTO library_logs
+             (student_id, book_id, operation)
+             VALUES (?, ?, 'Returned')`,
+            [
+                transaction.student_id,
+                transaction.book_id
+            ]
+        );
+
+        await connection.commit();
+
+        res.json({
+            message: "Book returned successfully",
+            transactionId: transaction.id,
+            student: transaction.student_name,
+            roll: transaction.roll,
+            book: transaction.book_name,
+            serial: transaction.serial,
+            issueDate: transaction.issue_date,
+            dueDate: transaction.due_date,
+            returnDate: returnDate,
+            status: "Returned"
+        });
+
+    } catch (error) {
+
+        await connection.rollback();
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to return book"
+        });
+
+    } finally {
+
+        connection.release();
+
+    }
+
+});
+
+
+
+
+
+
+
+
+
+// ================= STUDENT HISTORY =================
+
+app.get("/api/students/:roll/history", async (req, res) => {
+    try {
+
+        const roll = req.params.roll;
+
+        const [rows] = await pool.query(
+            `SELECT
+                bt.id AS transaction_id,
+                s.name AS student_name,
+                s.roll,
+                s.branch,
+                b.serial,
+                b.name AS book_name,
+                b.author,
+                bt.issue_date,
+                bt.due_date,
+                bt.return_date,
+                bt.status
+            FROM book_transactions bt
+            JOIN students s
+                ON bt.student_id = s.id
+            JOIN books b
+                ON bt.book_id = b.id
+            WHERE s.roll = ?
+            ORDER BY bt.id DESC`,
+            [roll]
+        );
+
+        res.json(rows);
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to fetch student history"
+        });
+
+    }
+});
+
+
+
+
+
+
+
+
+
+// ================= BOOK HISTORY =================
+
+app.get("/api/books/:serial/history", async (req, res) => {
+    try {
+
+        const serial = req.params.serial;
+
+        const [rows] = await pool.query(
+            `SELECT
+                bt.id AS transaction_id,
+                s.name AS student_name,
+                s.roll,
+                s.branch,
+                b.serial,
+                b.name AS book_name,
+                bt.issue_date,
+                bt.due_date,
+                bt.return_date,
+                bt.status
+            FROM book_transactions bt
+            JOIN students s
+                ON bt.student_id = s.id
+            JOIN books b
+                ON bt.book_id = b.id
+            WHERE b.serial = ?
+            ORDER BY bt.id DESC`,
+            [serial]
+        );
+
+        res.json(rows);
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to fetch book history"
+        });
+
+    }
+});
+
+
+
+
+
+
+
+
+
+
+// ================= IMPORT / UPDATE STUDENT =================
+
+app.post("/api/students/import", async (req, res) => {
+    try {
+
+        const {
+            name,
+            roll,
+            phone,
+            branch,
+            photo
+        } = req.body;
+
+        if (!name || !roll || !branch) {
+            return res.status(400).json({
+                error: "Name, roll and branch are required"
+            });
+        }
+
+        const [existing] = await pool.query(
+            "SELECT id FROM students WHERE roll = ?",
+            [roll]
+        );
+
+        if (existing.length > 0) {
+
+            await pool.query(
+                `UPDATE students
+                 SET name = ?,
+                     phone = ?,
+                     branch = ?,
+                     photo = ?,
+                     is_active = TRUE
+                 WHERE roll = ?`,
+                [
+                    name,
+                    phone || null,
+                    branch,
+                    photo || null,
+                    roll
+                ]
+            );
+
+            return res.json({
+                message: "Student updated successfully",
+                action: "updated"
+            });
+        }
+
+        await pool.query(
+            `INSERT INTO students
+             (name, roll, phone, branch, photo)
+             VALUES (?, ?, ?, ?, ?)`,
+            [
+                name,
+                roll,
+                phone || null,
+                branch,
+                photo || null
+            ]
+        );
+
+        res.status(201).json({
+            message: "Student imported successfully",
+            action: "created"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to import student"
+        });
+    }
+});
+
+
+
+
+
+
+
+
 // ================= START SERVER =================
 
 const PORT = process.env.PORT || 5000;
@@ -934,6 +1236,51 @@ app.get("/api/reports/library", async (req, res) => {
 
         res.status(500).json({
             error: "Failed to generate report"
+        });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// DELETE STUDENT
+
+app.delete("/api/students/:id", async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+
+        const [result] = await pool.query(
+            "DELETE FROM students WHERE id = ?",
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+
+            return res.status(404).json({
+                error: "Student not found"
+            });
+        }
+
+        res.json({
+            message: "Student deleted successfully"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to delete student"
         });
     }
 });

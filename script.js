@@ -919,44 +919,53 @@ function updateReturnDate() {
 
 // ================= DELETE STUDENT =================
 
-function deleteStudent(studentId) {
+// ================= DELETE STUDENT =================
+
+async function deleteStudent(studentId) {
 
     if (!confirm("Delete this student?")) {
         return;
     }
 
-    let students =
-        JSON.parse(localStorage.getItem("students")) || [];
+    try {
 
-    const student =
-        students.find(s => s.id === studentId);
+        const response =
+            await fetch(
+                API + "/students/" + studentId,
+                {
+                    method: "DELETE"
+                }
+            );
 
-    if (!student) {
-        return;
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.error ||
+                "Failed to delete student"
+            );
+
+            return;
+        }
+
+        alert("Student Deleted Successfully");
+
+        loadStudents(currentBranch);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to delete student. " +
+            "Check the backend."
+        );
     }
-
-    let deletedStudents =
-        JSON.parse(
-            localStorage.getItem("deletedStudents")
-        ) || [];
-
-    deletedStudents.push(student);
-
-    students =
-        students.filter(s => s.id !== studentId);
-
-    localStorage.setItem(
-        "deletedStudents",
-        JSON.stringify(deletedStudents)
-    );
-
-    localStorage.setItem(
-        "students",
-        JSON.stringify(students)
-    );
-
-    loadStudents(currentBranch);
 }
+
+
 
 
 // =====================================================
