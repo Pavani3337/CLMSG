@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api";
+const API = "http://10.49.217.244:5000/api";
 
 let studentLoggedIn = null;
 let otpStore = null;
