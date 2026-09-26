@@ -920,7 +920,6 @@ function updateReturnDate() {
 // ================= DELETE STUDENT =================
 
 // ================= DELETE STUDENT =================
-
 async function deleteStudent(studentId) {
 
     if (!confirm("Delete this student?")) {
@@ -929,16 +928,14 @@ async function deleteStudent(studentId) {
 
     try {
 
-        const response =
-            await fetch(
-                API + "/students/" + studentId,
-                {
-                    method: "DELETE"
-                }
-            );
+        const response = await fetch(
+            API + "/students/" + studentId,
+            {
+                method: "DELETE"
+            }
+        );
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (!response.ok) {
 
