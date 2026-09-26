@@ -663,7 +663,7 @@ async function showProfile(roll) {
 
 // ================= LOAD ISSUED BOOKS =================
 
-function loadIssuedBooks() {
+async function loadIssuedBooks() {
 
     const table =
         document.getElementById("issuedTable");
@@ -674,54 +674,83 @@ function loadIssuedBooks() {
         return;
     }
 
-    currentStudent.issuedBooks =
-        currentStudent.issuedBooks || [];
+    try {
 
-    currentStudent.issuedBooks.forEach((book, index) => {
+        const response =
+            await fetch(
+                API +
+                "/students/" +
+                encodeURIComponent(currentStudent.roll) +
+                "/history"
+            );
 
-        const row =
-            document.createElement("tr");
+        const books =
+            await response.json();
 
-        row.innerHTML = `
+        if (!response.ok) {
 
-            <td>${index + 1}</td>
+            alert(
+                books.error ||
+                "Failed to load book history"
+            );
 
-            <td>${book.bookName}</td>
+            return;
+        }
 
-            <td>${book.author}</td>
+        books.forEach((book, index) => {
 
-            <td>${book.issueDate}</td>
+            const row =
+                document.createElement("tr");
 
-            <td>${book.dueDate}</td>
+            row.innerHTML = `
 
-            <td>${book.status}</td>
+                <td>${index + 1}</td>
 
-            <td>${book.returnDate || "-"}</td>
+                <td>${book.bookName}</td>
 
-            <td>
+                <td>${book.author}</td>
 
-                ${
-                    book.status === "Issued"
+                <td>${book.issueDate}</td>
 
-                    ?
+                <td>${book.dueDate || "-"}</td>
 
-                    `<button onclick="returnBook(${index})">
-                        Return
-                    </button>`
+                <td>${book.status}</td>
 
-                    :
+                <td>${book.returnDate || "-"}</td>
 
-                    "-"
-                }
+                <td>
 
-            </td>
+                    ${
+                        book.status === "Issued"
 
-        `;
+                        ?
 
-        table.appendChild(row);
-    });
+                        `<button onclick="returnBook(${book.transactionId})">
+                            Return
+                        </button>`
+
+                        :
+
+                        "-"
+                    }
+
+                </td>
+
+            `;
+
+            table.appendChild(row);
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Failed to load issued books.\n" +
+            "Make sure the backend is running."
+        );
+    }
 }
-
 
 // ================= SHOW ISSUE BOOK =================
 
