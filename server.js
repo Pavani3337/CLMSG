@@ -864,29 +864,42 @@ app.post("/api/students/import", async (req, res) => {
 
 
 // DELETE STUDENT
-app.delete("/api/students/:id", async (req, res) => {
 
+app.delete("/api/students/:id", async (req, res) => {
     const { id } = req.params;
 
     try {
-
-        const [result] = await pool.query(
-            "DELETE FROM students WHERE id = ?",
+        // Get student roll number
+        const [students] = await pool.query(
+            "SELECT roll FROM students WHERE id = ?",
             [id]
         );
 
-        if (result.affectedRows === 0) {
+        if (students.length === 0) {
             return res.status(404).json({
                 error: "Student not found"
             });
         }
+
+        const roll = students[0].roll;
+
+        // Remember that this student was deleted from CLMSG
+        await pool.query(
+            "INSERT IGNORE INTO deleted_students (roll) VALUES (?)",
+            [roll]
+        );
+
+        // Permanently delete student from students table
+        await pool.query(
+            "DELETE FROM students WHERE id = ?",
+            [id]
+        );
 
         res.json({
             message: "Student deleted successfully"
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -894,8 +907,6 @@ app.delete("/api/students/:id", async (req, res) => {
         });
     }
 });
-
-
 
 
 
