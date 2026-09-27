@@ -753,10 +753,6 @@ async function showProfile(roll) {
             currentStudent.photo ||
             "https://via.placeholder.com/120";
 
-        /*
-         * loadIssuedBooks() gets the current
-         * issued count directly from MySQL.
-         */
         await loadIssuedBooks();
 
     } catch (error) {
@@ -804,25 +800,16 @@ async function loadIssuedBooks() {
             return;
         }
 
-        /*
-         * Count ONLY currently issued books.
-         * Returned books are not counted.
-         */
         const issuedBooks =
             books.filter(
                 book => book.status === "Issued"
             ).length;
-
-        // ================= UPDATE LIMIT =================
 
         document.getElementById("bookLimit").textContent =
             "Books Issued: " +
             issuedBooks +
             " / " +
             BOOK_LIMIT;
-
-
-        // ================= DISPLAY BOOKS =================
 
         books.forEach((book, index) => {
 
@@ -870,10 +857,6 @@ async function loadIssuedBooks() {
 
         });
 
-        /*
-         * If the student has already reached
-         * the limit, disable Issue Book button.
-         */
         updateIssueButton(issuedBooks);
 
     } catch (error) {
@@ -925,10 +908,6 @@ async function showIssueBook() {
         return;
     }
 
-    /*
-     * Get the latest history from MySQL
-     * before allowing a new issue.
-     */
     try {
 
         const response =
@@ -978,10 +957,28 @@ async function showIssueBook() {
             .getElementById("issueArea")
             .classList.remove("hidden");
 
+        /*
+         * Display today's system date.
+         * This is only for display.
+         * server.js decides the actual issue date.
+         */
+        const today =
+            new Date();
+
+        const localDate =
+            today.getFullYear() +
+            "-" +
+            String(today.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(today.getDate()).padStart(2, "0");
+
         document.getElementById("issueDate").value =
-            new Date()
-                .toISOString()
-                .split("T")[0];
+            localDate;
+
+        /*
+         * Due date is now calculated by server.js.
+         * We don't manually set or trust it here.
+         */
 
         loadBookOptions();
 
@@ -1118,15 +1115,9 @@ async function issueBook() {
     const serial =
         document.getElementById("bookSelect").value;
 
-    const issueDate =
-        document.getElementById("issueDate").value;
+    if (!serial) {
 
-    const dueDate =
-        document.getElementById("dueDate").value;
-
-    if (!serial || !issueDate || !dueDate) {
-
-        alert("Please select book and dates");
+        alert("Please select a book");
 
         return;
     }
@@ -1136,6 +1127,7 @@ async function issueBook() {
         /*
          * Check current limit immediately before issuing.
          */
+
         const historyResponse =
             await fetch(
                 API +
@@ -1187,19 +1179,21 @@ async function issueBook() {
                         "Content-Type": "application/json"
                     },
 
+                    /*
+                     * Only send roll and serial.
+                     * server.js automatically calculates:
+                     *
+                     * Issue Date = system date
+                     * Due Date   = issue date + 15 days
+                     */
+
                     body: JSON.stringify({
 
                         roll:
                             currentStudent.roll,
 
                         serial:
-                            serial,
-
-                        issueDate:
-                            issueDate,
-
-                        dueDate:
-                            dueDate
+                            serial
 
                     })
                 }
@@ -1215,25 +1209,24 @@ async function issueBook() {
                 "Failed to issue book"
             );
 
-            /*
-             * Refresh profile because the backend
-             * may have rejected the transaction.
-             */
             await showProfile(currentStudent.roll);
 
             return;
         }
 
-        alert("Book issued successfully");
+        alert(
+            "Book issued successfully.\n\n" +
+            "Issue Date: " +
+            data.issueDate +
+            "\n" +
+            "Due Date: " +
+            data.dueDate
+        );
 
         document
             .getElementById("issueArea")
             .classList.add("hidden");
 
-        /*
-         * Refresh books and student profile.
-         * This automatically changes 2/4 → 3/4 etc.
-         */
         await loadBooks();
 
         await showProfile(currentStudent.roll);
@@ -1258,7 +1251,6 @@ async function returnBook(transactionId) {
         return;
     }
 
-    
     if (!confirm("Return this book?")) {
         return;
     }
@@ -1274,6 +1266,11 @@ async function returnBook(transactionId) {
                     headers: {
                         "Content-Type": "application/json"
                     },
+
+                    /*
+                     * server.js automatically sets
+                     * return date to system date.
+                     */
 
                     body: JSON.stringify({
 
@@ -1297,15 +1294,12 @@ async function returnBook(transactionId) {
             return;
         }
 
-        alert("Book returned successfully");
+        alert(
+            "Book returned successfully.\n\n" +
+            "Return Date: " +
+            data.returnDate
+        );
 
-        /*
-         * Refresh everything.
-         *
-         * Example:
-         * Before return: 4 / 4
-         * After return : 3 / 4
-         */
         await loadBooks();
 
         await showProfile(currentStudent.roll);
@@ -1588,8 +1582,6 @@ async function importStudents() {
                     "&sz=w500";
             }
 
-            // ================= CHECK DELETED =================
-
             const deletedResponse =
                 await fetch(
                     API +
@@ -1603,8 +1595,6 @@ async function importStudents() {
 
                 continue;
             }
-
-            // ================= SEND TO MYSQL =================
 
             const mysqlResponse =
                 await fetch(
@@ -1896,9 +1886,6 @@ function downloadMyReport() {
 // LIBRARY REPORTS
 // =====================================================
 
-
-// ================= SINGLE DATE REPORT =================
-
 async function generateSingleReport() {
 
     const date =
@@ -1919,8 +1906,6 @@ async function generateSingleReport() {
     );
 }
 
-
-// ================= DATE RANGE REPORT =================
 
 async function generateRangeReport() {
 
@@ -2047,10 +2032,6 @@ async function generateLibraryReport(from, to) {
             return;
         }
 
-        /*
-         * Get the current borrowing count
-         * of every student appearing in the report.
-         */
         const borrowingCounts =
             await getCurrentBorrowingCounts(
                 data.logs || []
@@ -2225,8 +2206,6 @@ function downloadReport() {
         logo
     ) {
 
-        // ================= HEADER =================
-
         if (logo) {
 
             doc.addImage(
@@ -2272,8 +2251,6 @@ function downloadReport() {
             }
         );
 
-        // ================= GENERATED DATE =================
-
         doc.setFontSize(9);
 
         doc.text(
@@ -2286,8 +2263,6 @@ function downloadReport() {
             }
         );
 
-
-        // ================= SUMMARY =================
 
         doc.autoTable({
 
@@ -2324,8 +2299,6 @@ function downloadReport() {
             15;
 
 
-        // ================= LIMIT INFORMATION =================
-
         doc.setFontSize(10);
 
         doc.text(
@@ -2337,8 +2310,6 @@ function downloadReport() {
 
         y += 12;
 
-
-        // ================= DATE-WISE REPORT =================
 
         dates.forEach(date => {
 
@@ -2401,8 +2372,6 @@ function downloadReport() {
             y += 8;
 
 
-            // ================= ISSUED BOOKS =================
-
             if (dateIssued.length > 0) {
 
                 doc.autoTable({
@@ -2453,8 +2422,6 @@ function downloadReport() {
                     12;
             }
 
-
-            // ================= RETURNED BOOKS =================
 
             if (dateReturned.length > 0) {
 
@@ -2516,8 +2483,6 @@ function downloadReport() {
         });
 
 
-        // ================= LIBRARIAN SIGNATURE =================
-
         const pageHeight =
             doc.internal.pageSize.getHeight();
 
@@ -2554,8 +2519,6 @@ function downloadReport() {
             signatureY - 5
         );
 
-
-        // ================= SAVE =================
 
         doc.save(
             "library_report_" +

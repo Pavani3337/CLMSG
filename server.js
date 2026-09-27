@@ -390,79 +390,43 @@ app.delete("/api/books/:serial", async (req, res) => {
 
 // ================= ISSUE BOOK =================
 
-// ================= ISSUE BOOK =================
-
 app.post("/api/transactions/issue", async (req, res) => {
 
     const {
         roll,
-        serial
+        serial,
+        issueDate,
+        dueDate
     } = req.body;
 
-    if (!roll || !serial) {
+    if (!roll || !serial || !issueDate || !dueDate) {
 
         return res.status(400).json({
-            error: "Roll and book serial are required"
+            error: "Roll, book serial, issue date and due date are required"
         });
 
     }
 
-
-    // ================= SYSTEM DATE =================
-
-    const now = new Date();
-
-    const issueDate =
-        now.getFullYear() +
-        "-" +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(now.getDate()).padStart(2, "0");
-
-
-    // ================= DUE DATE = ISSUE DATE + 15 DAYS =================
-
-    const due =
-        new Date(now);
-
-    due.setDate(
-        due.getDate() + 15
-    );
-
-    const dueDate =
-        due.getFullYear() +
-        "-" +
-        String(due.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(due.getDate()).padStart(2, "0");
-
-
-    const connection =
-        await pool.getConnection();
-
+    const connection = await pool.getConnection();
 
     try {
 
         await connection.beginTransaction();
 
 
-        // ================= FIND AND LOCK STUDENT =================
+        // Find and lock student
 
-        const [students] =
-            await connection.query(
+        const [students] = await connection.query(
 
-                `SELECT
-                    id,
-                    name
-                 FROM students
-                 WHERE roll = ?
-                 AND is_active = TRUE
-                 FOR UPDATE`,
+            `SELECT id, name
+             FROM students
+             WHERE roll = ?
+             AND is_active = TRUE
+             FOR UPDATE`,
 
-                [roll]
+            [roll]
 
-            );
-
+        );
 
         if (students.length === 0) {
 
@@ -474,38 +438,29 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         }
 
-
-        const student =
-            students[0];
+        const student = students[0];
 
 
-        // ================= COUNT CURRENT ISSUED BOOKS =================
+        // Count current issued books
 
-        const [issuedBooks] =
-            await connection.query(
+        const [issuedBooks] = await connection.query(
 
-                `SELECT COUNT(*) AS count
-                 FROM book_transactions
-                 WHERE student_id = ?
-                 AND status = 'Issued'`,
+            `SELECT COUNT(*) AS count
+             FROM book_transactions
+             WHERE student_id = ?
+             AND status = 'Issued'`,
 
-                [student.id]
+            [student.id]
 
-            );
-
+        );
 
         const currentIssuedCount =
-            Number(
-                issuedBooks[0].count
-            );
+            Number(issuedBooks[0].count);
 
 
-        // ================= MAXIMUM 4 BOOKS =================
+        // Maximum 4 books
 
-        if (
-            currentIssuedCount >=
-            MAX_BOOK_LIMIT
-        ) {
+        if (currentIssuedCount >= MAX_BOOK_LIMIT) {
 
             await connection.rollback();
 
@@ -519,24 +474,22 @@ app.post("/api/transactions/issue", async (req, res) => {
         }
 
 
-        // ================= LOCK BOOK =================
+        // Lock book row
 
-        const [books] =
-            await connection.query(
+        const [books] = await connection.query(
 
-                `SELECT
-                    id,
-                    name,
-                    author,
-                    available_copies
-                 FROM books
-                 WHERE serial = ?
-                 FOR UPDATE`,
+            `SELECT
+                id,
+                name,
+                author,
+                available_copies
+             FROM books
+             WHERE serial = ?
+             FOR UPDATE`,
 
-                [serial]
+            [serial]
 
-            );
-
+        );
 
         if (books.length === 0) {
 
@@ -548,16 +501,12 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         }
 
-
-        const book =
-            books[0];
+        const book = books[0];
 
 
-        // ================= CHECK AVAILABILITY =================
+        // Check availability
 
-        if (
-            book.available_copies <= 0
-        ) {
+        if (book.available_copies <= 0) {
 
             await connection.rollback();
 
@@ -568,65 +517,59 @@ app.post("/api/transactions/issue", async (req, res) => {
         }
 
 
-        // ================= CHECK DUPLICATE ACTIVE BOOK =================
+        // Check duplicate active book
 
-        const [activeIssue] =
-            await connection.query(
+        const [activeIssue] = await connection.query(
 
-                `SELECT id
-                 FROM book_transactions
-                 WHERE student_id = ?
-                 AND book_id = ?
-                 AND status = 'Issued'`,
+            `SELECT id
+             FROM book_transactions
+             WHERE student_id = ?
+             AND book_id = ?
+             AND status = 'Issued'`,
 
-                [
-                    student.id,
-                    book.id
-                ]
+            [
+                student.id,
+                book.id
+            ]
 
-            );
+        );
 
-
-        if (
-            activeIssue.length > 0
-        ) {
+        if (activeIssue.length > 0) {
 
             await connection.rollback();
 
             return res.status(400).json({
-                error:
-                    "This student already has this book"
+                error: "This student already has this book"
             });
 
         }
 
 
-        // ================= CREATE TRANSACTION =================
+        // Create transaction
 
-        const [result] =
-            await connection.query(
+        const [result] = await connection.query(
 
-                `INSERT INTO book_transactions
-                (
-                    student_id,
-                    book_id,
-                    issue_date,
-                    due_date,
-                    status
-                )
-                VALUES (?, ?, ?, ?, 'Issued')`,
+            `INSERT INTO book_transactions
+            (
+                student_id,
+                book_id,
+                issue_date,
+                due_date,
+                status
+            )
+            VALUES (?, ?, ?, ?, 'Issued')`,
 
-                [
-                    student.id,
-                    book.id,
-                    issueDate,
-                    dueDate
-                ]
+            [
+                student.id,
+                book.id,
+                issueDate,
+                dueDate
+            ]
 
-            );
+        );
 
 
-        // ================= DECREASE AVAILABLE COPIES =================
+        // Decrease available copies
 
         await connection.query(
 
@@ -640,7 +583,7 @@ app.post("/api/transactions/issue", async (req, res) => {
         );
 
 
-        // ================= ADD LIBRARY LOG =================
+        // Add library log
 
         await connection.query(
 
@@ -667,42 +610,29 @@ app.post("/api/transactions/issue", async (req, res) => {
             currentIssuedCount + 1;
 
 
-        // ================= RESPONSE =================
-
         res.status(201).json({
 
-            message:
-                "Book issued successfully",
+            message: "Book issued successfully",
 
-            transactionId:
-                result.insertId,
+            transactionId: result.insertId,
 
-            student:
-                student.name,
+            student: student.name,
 
-            roll:
-                roll,
+            roll: roll,
 
-            book:
-                book.name,
+            book: book.name,
 
-            serial:
-                serial,
+            serial: serial,
 
-            issueDate:
-                issueDate,
+            issueDate: issueDate,
 
-            dueDate:
-                dueDate,
+            dueDate: dueDate,
 
-            issuedBooks:
-                newIssuedCount,
+            issuedBooks: newIssuedCount,
 
-            bookLimit:
-                MAX_BOOK_LIMIT
+            bookLimit: MAX_BOOK_LIMIT
 
         });
-
 
     } catch (error) {
 
@@ -711,8 +641,7 @@ app.post("/api/transactions/issue", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            error:
-                "Failed to issue book"
+            error: "Failed to issue book"
         });
 
     } finally {
