@@ -1810,130 +1810,299 @@ async function generateLibraryReport(from, to) {
 }
 
 
+
+
 // ================= DOWNLOAD REPORT =================
 
 function downloadReport() {
 
-    if (
-        !currentReport ||
-        !currentReport.logs
-    ) {
+    if (!currentReport || !currentReport.logs) {
 
-        alert(
-            "Please generate a report first."
-        );
+        alert("Please generate a report first");
 
         return;
     }
 
-    const {
-        jsPDF
-    } = window.jspdf;
+    const { jsPDF } = window.jspdf;
 
-    const doc =
-        new jsPDF();
+    const doc = new jsPDF();
 
-    doc.setFontSize(16);
+    const logs = currentReport.logs;
 
-    doc.text(
-        "College Library Management System",
-        14,
-        15
-    );
+    const issued =
+        logs.filter(log => log.operation === "Issued");
 
-    doc.setFontSize(13);
+    const returned =
+        logs.filter(log => log.operation === "Returned");
 
-    doc.text(
-        "Library Activity Report",
-        14,
-        24
-    );
+    const dates =
+        [...new Set(logs.map(log => log.date))].sort();
 
-    doc.setFontSize(10);
+    const logo = new Image();
 
-    doc.text(
-        "From: " +
-        currentReport.from,
-        14,
-        32
-    );
+    logo.src = "logo.png";
 
-    doc.text(
-        "To: " +
-        currentReport.to,
-        14,
-        38
-    );
+    logo.onload = function () {
 
-    doc.text(
-        "Total Activities: " +
-        currentReport.total,
-        14,
-        44
-    );
+        createReport(doc, logo);
+
+    };
+
+    logo.onerror = function () {
+
+        createReport(doc, null);
+
+    };
 
 
-    const rows =
-        currentReport.logs.map(
-            (log, index) => [
+    function createReport(doc, logo) {
 
-                index + 1,
+        // ================= HEADER =================
 
-                log.date,
+        if (logo) {
 
-                log.operation,
+            doc.addImage(
+                logo,
+                "PNG",
+                85,
+                10,
+                40,
+                40
+            );
+        }
 
-                log.student_name || "-",
+        doc.setFontSize(18);
 
-                log.roll || "-",
+        doc.text(
+            "UCEN JNTUK",
+            105,
+            58,
+            { align: "center" }
+        );
 
-                log.book_name || "-",
+        doc.setFontSize(14);
 
-                log.author || "-"
-            ]
+        doc.text(
+            "Central Library",
+            105,
+            67,
+            { align: "center" }
+        );
+
+        doc.setFontSize(16);
+
+        doc.text(
+            "Library Activity Report",
+            105,
+            77,
+            { align: "center" }
         );
 
 
-    doc.autoTable({
+        // ================= GENERATED DATE =================
 
-        startY: 50,
+        doc.setFontSize(9);
 
-        head: [[
-
-            "S.No",
-
-            "Date",
-
-            "Action",
-
-            "Student",
-
-            "Roll No",
-
-            "Book",
-
-            "Author"
-
-        ]],
-
-        body: rows,
-
-        styles: {
-            fontSize: 8
-        },
-
-        headStyles: {
-            fontSize: 8
-        }
-
-    });
+        doc.text(
+            "Generated On: " +
+            new Date().toLocaleString(),
+            105,
+            87,
+            { align: "center" }
+        );
 
 
-    doc.save(
-        "library_report_" +
-        currentReport.from +
-        "_to_" +
-        currentReport.to +
-        ".pdf"
-    );
+        // ================= SUMMARY =================
+
+        doc.autoTable({
+
+            startY: 96,
+
+            head: [[
+                "Books Issued",
+                "Books Returned",
+                "Total Transactions"
+            ]],
+
+            body: [[
+                issued.length,
+                returned.length,
+                logs.length
+            ]],
+
+            theme: "grid",
+
+            styles: {
+                fontSize: 10,
+                halign: "center"
+            },
+
+            headStyles: {
+                halign: "center"
+            }
+
+        });
+
+
+        let y =
+            doc.lastAutoTable.finalY + 15;
+
+
+        // ================= DATE-WISE REPORT =================
+
+        dates.forEach((date, dateIndex) => {
+
+            const dateLogs =
+                logs.filter(log =>
+                    log.date === date
+                );
+
+            const dateIssued =
+                dateLogs.filter(log =>
+                    log.operation === "Issued"
+                );
+
+            const dateReturned =
+                dateLogs.filter(log =>
+                    log.operation === "Returned"
+                );
+
+
+            // New page if required
+
+            if (y > 240) {
+
+                doc.addPage();
+
+                y = 20;
+            }
+
+
+            doc.setFontSize(12);
+
+            doc.text(
+                "Date : " + date,
+                14,
+                y
+            );
+
+            y += 8;
+
+
+            doc.setFontSize(10);
+
+            doc.text(
+                "Books Issued : " +
+                dateIssued.length,
+                14,
+                y
+            );
+
+            y += 6;
+
+            doc.text(
+                "Books Returned : " +
+                dateReturned.length,
+                14,
+                y
+            );
+
+            y += 8;
+
+
+            // ================= ISSUED BOOKS =================
+
+            if (dateIssued.length > 0) {
+
+                doc.autoTable({
+
+                    startY: y,
+
+                    head: [[
+                        "Issued Book",
+                        "Student Name",
+                        "Roll Number"
+                    ]],
+
+                    body:
+                        dateIssued.map(log => [
+
+                            log.book_name || "-",
+
+                            log.student_name || "-",
+
+                            log.roll || "-"
+
+                        ]),
+
+                    theme: "grid",
+
+                    styles: {
+                        fontSize: 8
+                    }
+
+                });
+
+                y =
+                    doc.lastAutoTable.finalY + 12;
+            }
+
+
+            // ================= RETURNED BOOKS =================
+
+            if (dateReturned.length > 0) {
+
+                if (y > 240) {
+
+                    doc.addPage();
+
+                    y = 20;
+                }
+
+                doc.autoTable({
+
+                    startY: y,
+
+                    head: [[
+                        "Returned Book",
+                        "Student Name",
+                        "Roll Number"
+                    ]],
+
+                    body:
+                        dateReturned.map(log => [
+
+                            log.book_name || "-",
+
+                            log.student_name || "-",
+
+                            log.roll || "-"
+
+                        ]),
+
+                    theme: "grid",
+
+                    styles: {
+                        fontSize: 8
+                    }
+
+                });
+
+                y =
+                    doc.lastAutoTable.finalY + 12;
+            }
+
+        });
+
+
+        // ================= SAVE =================
+
+        doc.save(
+            "library_report_" +
+            currentReport.from +
+            "_to_" +
+            currentReport.to +
+            ".pdf"
+        );
+    }
 }
