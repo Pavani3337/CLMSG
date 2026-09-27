@@ -1261,70 +1261,127 @@ app.get("/api/reports/library", async (req, res) => {
 
 // ================= START SERVER =================
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, "0.0.0.0", () => {
-
-    console.log(
-        `CLMSG Backend running at http://10.49.217.244:${PORT}`
-    );
-
-});
-
-
-
-
-
-
-
+// ================= STUDENT SEND OTP =================
 
 app.post("/api/student/send-otp", async (req, res) => {
 
     try {
 
-        const { roll, phone } = req.body;
+        const {
+            roll,
+            phone
+        } = req.body;
+
 
         if (!roll || !phone) {
+
             return res.status(400).json({
-                message: "Roll number and mobile number are required"
+
+                message:
+                    "Roll number and mobile number are required"
+
             });
+
         }
+
 
         const [students] = await pool.query(
-            "SELECT id, name, roll, phone, branch FROM students WHERE roll = ? AND phone = ? AND is_active = TRUE",
-            [roll, phone]
+
+            `SELECT
+                id,
+                name,
+                roll,
+                phone,
+                branch
+
+             FROM students
+
+             WHERE roll = ?
+             AND phone = ?
+             AND is_active = TRUE`,
+
+            [
+                roll,
+                phone
+            ]
+
         );
 
+
         if (students.length === 0) {
+
             return res.status(404).json({
-                message: "Student not found"
+
+                message:
+                    "Student not found"
+
             });
+
         }
 
-        const student = students[0];
 
-        const otp = crypto
-            .randomInt(100000, 1000000)
+        const otp =
+
+            crypto
+            .randomInt(
+                100000,
+                1000000
+            )
             .toString();
 
-        otpStore.set(roll, {
-            otp: otp,
-            expires: Date.now() + 5 * 60 * 1000
-        });
 
-        console.log("Development OTP for", roll, ":", otp);
+        otpStore.set(
+
+            roll,
+
+            {
+
+                otp: otp,
+
+                expires:
+                    Date.now() +
+                    5 * 60 * 1000
+
+            }
+
+        );
+
+
+        /*
+           Development only.
+
+           Later this OTP will be sent
+           through an actual SMS provider.
+        */
+
+        console.log(
+            "Development OTP for",
+            roll,
+            ":",
+            otp
+        );
+
 
         res.json({
+
             success: true,
-            message: "OTP generated successfully"
+
+            message:
+                "OTP generated successfully"
+
         });
+
 
     } catch (error) {
 
         console.error(error);
 
+
         res.status(500).json({
-            message: "Server error"
+
+            message:
+                "Server error"
+
         });
 
     }
@@ -1332,73 +1389,133 @@ app.post("/api/student/send-otp", async (req, res) => {
 });
 
 
-
-
-
-
+// ================= STUDENT VERIFY OTP =================
 
 app.post("/api/student/verify-otp", async (req, res) => {
 
     try {
 
-        const { roll, otp } = req.body;
+        const {
+            roll,
+            otp
+        } = req.body;
+
 
         if (!roll || !otp) {
+
             return res.status(400).json({
-                message: "Roll number and OTP are required"
+
+                message:
+                    "Roll number and OTP are required"
+
             });
+
         }
 
-        const savedOTP = otpStore.get(roll);
+
+        const savedOTP =
+            otpStore.get(roll);
+
 
         if (!savedOTP) {
+
             return res.status(400).json({
-                message: "OTP not found or expired"
+
+                message:
+                    "OTP not found or expired"
+
             });
+
         }
 
-        if (Date.now() > savedOTP.expires) {
+
+        if (
+            Date.now() >
+            savedOTP.expires
+        ) {
 
             otpStore.delete(roll);
 
+
             return res.status(400).json({
-                message: "OTP expired"
+
+                message:
+                    "OTP expired"
+
             });
 
         }
 
-        if (savedOTP.otp !== otp) {
+
+        if (
+            savedOTP.otp !== otp
+        ) {
+
             return res.status(400).json({
-                message: "Invalid OTP"
+
+                message:
+                    "Invalid OTP"
+
             });
+
         }
+
 
         otpStore.delete(roll);
 
-        const [students] = await pool.query(
-            `SELECT id, name, roll, phone, branch
-             FROM students
-             WHERE roll = ? AND is_active = TRUE`,
-            [roll]
-        );
+
+        const [students] =
+            await pool.query(
+
+                `SELECT
+                    id,
+                    name,
+                    roll,
+                    phone,
+                    branch
+
+                 FROM students
+
+                 WHERE roll = ?
+                 AND is_active = TRUE`,
+
+                [roll]
+
+            );
+
 
         if (students.length === 0) {
+
             return res.status(404).json({
-                message: "Student not found"
+
+                message:
+                    "Student not found"
+
             });
+
         }
 
+
         res.json({
+
             success: true,
-            student: students[0]
+
+            student:
+                students[0]
+
         });
+
 
     } catch (error) {
 
         console.error(error);
 
+
         res.status(500).json({
-            message: "Server error"
+
+            message:
+                "Server error"
+
         });
 
     }
@@ -1406,81 +1523,172 @@ app.post("/api/student/verify-otp", async (req, res) => {
 });
 
 
+// ================= STUDENT DASHBOARD =================
 
-
-app.get("/api/student/:roll/dashboard", async (req, res) => {
+app.get(
+    "/api/student/:roll/dashboard",
+    async (req, res) => {
 
     try {
 
-        const roll = req.params.roll;
+        const roll =
+            req.params.roll;
 
-        const [students] = await pool.query(
-            `SELECT id, name, roll, phone, branch
-             FROM students
-             WHERE roll = ? AND is_active = TRUE`,
-            [roll]
-        );
+
+        const [students] =
+            await pool.query(
+
+                `SELECT
+                    id,
+                    name,
+                    roll,
+                    phone,
+                    branch
+
+                 FROM students
+
+                 WHERE roll = ?
+                 AND is_active = TRUE`,
+
+                [roll]
+
+            );
+
 
         if (students.length === 0) {
+
             return res.status(404).json({
-                message: "Student not found"
+
+                message:
+                    "Student not found"
+
             });
+
         }
 
-        const student = students[0];
 
-        const [issued] = await pool.query(
-            `SELECT
-                b.name AS book_name,
-                b.author,
-                t.issue_date,
-                t.due_date,
-                t.status
-             FROM book_transactions t
-             JOIN books b ON t.book_id = b.id
-             WHERE t.student_id = ?
-             AND t.status = 'Issued'
-             ORDER BY t.issue_date DESC`,
-            [student.id]
-        );
+        const student =
+            students[0];
 
-        const [history] = await pool.query(
-            `SELECT
-                b.name AS book_name,
-                t.issue_date,
-                t.return_date,
-                t.status
-             FROM book_transactions t
-             JOIN books b ON t.book_id = b.id
-             WHERE t.student_id = ?
-             ORDER BY t.issue_date DESC`,
-            [student.id]
-        );
+
+        /* CURRENTLY ISSUED BOOKS */
+
+        const [issued] =
+            await pool.query(
+
+                `SELECT
+                    b.name AS book_name,
+                    b.author,
+                    t.issue_date,
+                    t.due_date,
+                    t.status
+
+                 FROM book_transactions t
+
+                 JOIN books b
+                 ON t.book_id = b.id
+
+                 WHERE t.student_id = ?
+
+                 AND t.status = 'Issued'
+
+                 ORDER BY
+                    t.issue_date DESC`,
+
+                [student.id]
+
+            );
+
+
+        /* COMPLETE HISTORY */
+
+        const [history] =
+            await pool.query(
+
+                `SELECT
+                    b.name AS book_name,
+                    b.author,
+                    t.issue_date,
+                    t.due_date,
+                    t.return_date,
+                    t.status
+
+                 FROM book_transactions t
+
+                 JOIN books b
+                 ON t.book_id = b.id
+
+                 WHERE t.student_id = ?
+
+                 ORDER BY
+                    t.issue_date DESC`,
+
+                [student.id]
+
+            );
+
 
         res.json({
+
             student: {
-                name: student.name,
-                roll: student.roll,
-                branch: student.branch
+
+                name:
+                    student.name,
+
+                roll:
+                    student.roll,
+
+                branch:
+                    student.branch
+
             },
 
-            issuedBooks: issued.length,
+            issuedBooks:
+                issued.length,
 
-            bookLimit: 4,
+            bookLimit:
+                MAX_BOOK_LIMIT,
 
-            issued: issued,
+            issued:
+                issued,
 
-            history: history
+            history:
+                history
+
         });
+
 
     } catch (error) {
 
         console.error(error);
 
+
         res.status(500).json({
-            message: "Server error"
+
+            message:
+                "Server error"
+
         });
 
     }
 
 });
+
+
+// ================= START SERVER =================
+
+const PORT =
+    process.env.PORT || 5000;
+
+
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
+
+        console.log(
+            `CLMSG Backend running at http://10.49.217.244:${PORT}`
+        );
+
+    }
+);

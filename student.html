@@ -13,7 +13,7 @@
 <style>
 
 .student-container {
-    max-width: 400px;
+    max-width: 500px;
     margin: 50px auto;
     padding: 25px;
     text-align: center;
@@ -23,6 +23,7 @@
     width: 90%;
     padding: 12px;
     margin: 8px;
+    box-sizing: border-box;
 }
 
 .student-container button {
@@ -38,6 +39,12 @@
 
 .alert-box {
     margin: 15px 0;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.book-card {
+    margin: 10px 0;
     padding: 10px;
 }
 
@@ -51,7 +58,7 @@
 <h1>College Library Management System</h1>
 
 
-<!-- STUDENT LOGIN -->
+<!-- ================= STUDENT LOGIN ================= -->
 
 <div id="loginSection" class="student-container">
 
@@ -74,7 +81,7 @@
     </button>
 
 
-    <!-- OTP -->
+    <!-- OTP SECTION -->
 
     <div id="otpSection">
 
@@ -97,19 +104,37 @@
 </div>
 
 
-<!-- STUDENT DASHBOARD -->
+<!-- ================= STUDENT DASHBOARD ================= -->
 
-<div id="studentDashboard" class="student-dashboard">
+<div id="studentDashboard" class="student-container">
 
     <h2>Student Dashboard</h2>
 
     <div id="studentDetails"></div>
 
+
     <h3 id="bookCount">
         Books Issued: 0 / 4
     </h3>
 
+
+    <!-- DUE DATE ALERTS -->
+
+    <div class="alert-box">
+
+        <h3>🔔 Due-Date Alerts</h3>
+
+        <div id="alerts">
+            No alerts.
+        </div>
+
+    </div>
+
+
     <hr>
+
+
+    <!-- CURRENTLY ISSUED BOOKS -->
 
     <h3>Currently Issued Books</h3>
 
@@ -117,7 +142,11 @@
         Loading...
     </div>
 
+
     <hr>
+
+
+    <!-- BORROWING HISTORY -->
 
     <h3>Borrowing History</h3>
 
@@ -125,7 +154,11 @@
         Loading...
     </div>
 
+
     <hr>
+
+
+    <!-- BOOK SEARCH -->
 
     <h3>Search Books</h3>
 
@@ -140,6 +173,7 @@
 
     <div id="searchResults"></div>
 
+
     <br>
 
     <button onclick="logoutStudent()">
@@ -148,123 +182,534 @@
 
 </div>
 
+
 <script>
 
-let demoOTP = "";
 
-
-/* SEND OTP */
+/* ================= SEND OTP ================= */
 
 async function sendOTP() {
 
     const roll =
-        document.getElementById("studentRoll").value.trim();
+        document
+        .getElementById("studentRoll")
+        .value
+        .trim();
 
     const phone =
-        document.getElementById("studentPhone").value.trim();
+        document
+        .getElementById("studentPhone")
+        .value
+        .trim();
+
 
     if (!roll || !phone) {
-        alert("Please enter Roll Number and Registered Mobile Number.");
+
+        alert(
+            "Please enter Roll Number and Registered Mobile Number."
+        );
+
         return;
     }
+
 
     try {
 
         const response = await fetch(
+
             "http://10.49.217.244:5000/api/student/send-otp",
+
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
+
                     roll: roll,
+
                     phone: phone
+
                 })
             }
+
         );
+
 
         const data = await response.json();
 
+
         if (!response.ok) {
-            alert(data.message);
+
+            alert(
+                data.message ||
+                "Unable to generate OTP."
+            );
+
             return;
         }
 
-        document.getElementById("otpSection").style.display = "block";
 
-        alert("OTP generated. Check the Node.js terminal.");
+        document
+            .getElementById("otpSection")
+            .style.display = "block";
+
+
+        alert(
+            "OTP generated. Check the Node.js terminal."
+        );
+
 
     } catch (error) {
 
-        alert("Unable to connect to CLMSG server.");
-
         console.error(error);
 
+        alert(
+            "Unable to connect to CLMSG server."
+        );
+
     }
+
 }
 
-/* VERIFY OTP */
+
+/* ================= VERIFY OTP ================= */
 
 async function verifyOTP() {
 
     const roll =
-        document.getElementById("studentRoll").value.trim();
+        document
+        .getElementById("studentRoll")
+        .value
+        .trim();
 
     const otp =
-        document.getElementById("studentOTP").value.trim();
+        document
+        .getElementById("studentOTP")
+        .value
+        .trim();
+
 
     if (!otp) {
+
         alert("Please enter OTP.");
+
         return;
     }
+
 
     try {
 
         const response = await fetch(
+
             "http://10.49.217.244:5000/api/student/verify-otp",
+
             {
                 method: "POST",
+
                 headers: {
                     "Content-Type": "application/json"
                 },
+
                 body: JSON.stringify({
+
                     roll: roll,
+
                     otp: otp
+
                 })
             }
+
         );
+
 
         const data = await response.json();
 
+
         if (!response.ok) {
-            alert(data.message);
+
+            alert(
+                data.message ||
+                "OTP verification failed."
+            );
+
             return;
         }
 
-        document.getElementById("loginSection").style.display = "none";
 
-document.getElementById("studentDashboard").style.display = "block";
+        document
+            .getElementById("loginSection")
+            .style.display = "none";
 
-loadStudentDashboard(data.student.roll);
 
-        document.getElementById("studentDetails").innerHTML =
-            "<p>Name: " + data.student.name + "</p>" +
-            "<p>Roll Number: " + data.student.roll + "</p>" +
-            "<p>Branch: " + data.student.branch + "</p>";
+        document
+            .getElementById("studentDashboard")
+            .style.display = "block";
 
-        alert("Student login successful.");
+
+        loadStudentDashboard(
+            data.student.roll
+        );
+
+
+        alert(
+            "Student login successful."
+        );
+
 
     } catch (error) {
 
-        alert("Unable to connect to CLMSG server.");
+        console.error(error);
+
+        alert(
+            "Unable to connect to CLMSG server."
+        );
+
+    }
+
+}
+
+
+/* ================= LOAD DASHBOARD ================= */
+
+async function loadStudentDashboard(roll) {
+
+    try {
+
+        const response = await fetch(
+
+            "http://10.49.217.244:5000/api/student/" +
+            encodeURIComponent(roll) +
+            "/dashboard"
+
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                "Unable to load dashboard."
+            );
+
+            return;
+        }
+
+
+        /* STUDENT DETAILS */
+
+        document
+            .getElementById("studentDetails")
+            .innerHTML =
+
+            "<p>Name: " +
+            data.student.name +
+            "</p>" +
+
+            "<p>Roll Number: " +
+            data.student.roll +
+            "</p>" +
+
+            "<p>Branch: " +
+            data.student.branch +
+            "</p>";
+
+
+        /* BOOK COUNT */
+
+        document
+            .getElementById("bookCount")
+            .innerText =
+
+            "Books Issued: " +
+            data.issuedBooks +
+            " / " +
+            data.bookLimit;
+
+
+        /* CURRENT BOOKS */
+
+        let issuedHTML = "";
+
+        let alertsHTML = "";
+
+
+        if (data.issued.length === 0) {
+
+            issuedHTML =
+                "<p>No books currently issued.</p>";
+
+            alertsHTML =
+                "<p>No alerts.</p>";
+
+        } else {
+
+
+            data.issued.forEach(book => {
+
+
+                const alert =
+                    getDueAlert(book.due_date);
+
+
+                issuedHTML +=
+
+                    "<div class='book-card'>" +
+
+                    "<b>" +
+                    book.book_name +
+                    "</b><br>" +
+
+                    "Author: " +
+                    (book.author || "-") +
+                    "<br>" +
+
+                    "Issue Date: " +
+                    formatDate(book.issue_date) +
+                    "<br>" +
+
+                    "Due Date: " +
+                    formatDate(book.due_date) +
+
+                    "</div><hr>";
+
+
+                if (alert) {
+
+                    alertsHTML +=
+
+                        "<p>" +
+
+                        "<b>" +
+                        book.book_name +
+                        "</b><br>" +
+
+                        alert +
+
+                        "</p>";
+
+                }
+
+            });
+
+        }
+
+
+        document
+            .getElementById("issuedBooks")
+            .innerHTML = issuedHTML;
+
+
+        document
+            .getElementById("alerts")
+            .innerHTML = alertsHTML;
+
+
+        /* BORROWING HISTORY */
+
+        let historyHTML = "";
+
+
+        if (data.history.length === 0) {
+
+            historyHTML =
+                "<p>No borrowing history.</p>";
+
+        } else {
+
+
+            data.history.forEach(book => {
+
+                historyHTML +=
+
+                    "<p>" +
+
+                    "<b>" +
+                    book.book_name +
+                    "</b><br>" +
+
+                    "Issue Date: " +
+                    formatDate(book.issue_date) +
+                    "<br>" +
+
+                    "Return Date: " +
+                    formatDate(book.return_date) +
+                    "<br>" +
+
+                    "Status: " +
+                    book.status +
+
+                    "</p><hr>";
+
+            });
+
+        }
+
+
+        document
+            .getElementById("history")
+            .innerHTML = historyHTML;
+
+
+    } catch (error) {
 
         console.error(error);
 
+        alert(
+            "Unable to load student dashboard."
+        );
+
     }
+
 }
 
-/* LOGOUT */
+
+/* ================= DATE FORMAT ================= */
+
+function formatDate(value) {
+
+    if (!value) {
+
+        return "-";
+
+    }
+
+
+    return String(value)
+        .split("T")[0];
+
+}
+
+
+/* ================= DUE DATE ALERT ================= */
+
+function getDueAlert(dueDate) {
+
+    if (!dueDate) {
+
+        return "";
+
+    }
+
+
+    /*
+       MySQL DATE is YYYY-MM-DD.
+       Create the date in local time to
+       avoid timezone/date-shift problems.
+    */
+
+    const parts =
+        String(dueDate)
+        .split("T")[0]
+        .split("-");
+
+
+    if (parts.length !== 3) {
+
+        return "";
+
+    }
+
+
+    const due =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+
+    const today =
+        new Date();
+
+    today.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    due.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    const difference =
+
+        Math.round(
+            (due - today) /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    if (difference > 3) {
+
+        return "";
+
+    }
+
+
+    if (difference === 3) {
+
+        return "📚 Book is due in 3 days";
+
+    }
+
+
+    if (difference === 2) {
+
+        return "📚 Book is due in 2 days";
+
+    }
+
+
+    if (difference === 1) {
+
+        return "📚 Book is due tomorrow";
+
+    }
+
+
+    if (difference === 0) {
+
+        return "⚠️ Book is due today";
+
+    }
+
+
+    return "🚨 Book is overdue by " +
+           Math.abs(difference) +
+           " day(s)";
+
+}
+
+
+/* ================= BOOK SEARCH ================= */
+
+/*
+   Step 5 will connect this function
+   to the MySQL books API.
+*/
+
+function searchBooks() {
+
+    alert(
+        "Book search will be connected in the next step."
+    );
+
+}
+
+
+/* ================= LOGOUT ================= */
 
 function logoutStudent() {
 
@@ -279,6 +724,16 @@ function logoutStudent() {
 
 
     document
+        .getElementById("studentRoll")
+        .value = "";
+
+
+    document
+        .getElementById("studentPhone")
+        .value = "";
+
+
+    document
         .getElementById("studentOTP")
         .value = "";
 
@@ -288,136 +743,29 @@ function logoutStudent() {
         .style.display = "none";
 
 
-    demoOTP = "";
+    document
+        .getElementById("studentDetails")
+        .innerHTML = "";
+
+
+    document
+        .getElementById("issuedBooks")
+        .innerHTML =
+        "Loading...";
+
+
+    document
+        .getElementById("history")
+        .innerHTML =
+        "Loading...";
+
+
+    document
+        .getElementById("alerts")
+        .innerHTML =
+        "No alerts.";
 
 }
-
-
-
-
-
-
-
-
-async function loadStudentDashboard(roll) {
-
-    try {
-
-        const response = await fetch(
-            "http://10.49.217.244:5000/api/student/" +
-            encodeURIComponent(roll) +
-            "/dashboard"
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            alert(data.message);
-            return;
-        }
-
-        document.getElementById("studentDetails").innerHTML =
-            "<p>Name: " + data.student.name + "</p>" +
-            "<p>Roll Number: " + data.student.roll + "</p>" +
-            "<p>Branch: " + data.student.branch + "</p>";
-
-        document.getElementById("bookCount").innerText =
-            "Books Issued: " +
-            data.issuedBooks +
-            " / " +
-            data.bookLimit;
-
-
-        /* CURRENT BOOKS */
-
-        let issuedHTML = "";
-
-        if (data.issued.length === 0) {
-
-            issuedHTML =
-                "<p>No books currently issued.</p>";
-
-        } else {
-
-            data.issued.forEach(book => {
-
-                issuedHTML +=
-                    "<p>" +
-                    "<b>" + book.book_name + "</b><br>" +
-                    "Author: " + (book.author || "-") + "<br>" +
-                    "Issue Date: " + formatDate(book.issue_date) + "<br>" +
-                    "Due Date: " + formatDate(book.due_date) +
-                    "</p><hr>";
-
-            });
-
-        }
-
-        document.getElementById("issuedBooks").innerHTML =
-            issuedHTML;
-
-
-        /* HISTORY */
-
-        let historyHTML = "";
-
-        if (data.history.length === 0) {
-
-            historyHTML =
-                "<p>No borrowing history.</p>";
-
-        } else {
-
-            data.history.forEach(book => {
-
-                historyHTML +=
-                    "<p>" +
-                    "<b>" + book.book_name + "</b><br>" +
-                    "Issue Date: " + formatDate(book.issue_date) + "<br>" +
-                    "Return Date: " + formatDate(book.return_date) + "<br>" +
-                    "Status: " + book.status +
-                    "</p><hr>";
-
-            });
-
-        }
-
-        document.getElementById("history").innerHTML =
-            historyHTML;
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert("Unable to load student dashboard.");
-
-    }
-
-}
-
-
-
-
-
-
-
-function formatDate(value) {
-
-    if (!value) {
-        return "-";
-    }
-
-    return String(value).split("T")[0];
-
-}
-
-
-
-
-
-
-
-
 
 </script>
 
