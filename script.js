@@ -2095,6 +2095,48 @@ function downloadReport() {
         });
 
 
+
+
+
+
+
+// ================= LIBRARIAN SIGNATURE =================
+
+const pageHeight =
+    doc.internal.pageSize.getHeight();
+
+const pageWidth =
+    doc.internal.pageSize.getWidth();
+
+if (y > pageHeight - 50) {
+
+    doc.addPage();
+
+}
+
+const signatureY =
+    doc.internal.pageSize.getHeight() - 25;
+
+doc.setFontSize(10);
+
+doc.text(
+    "Librarian Signature",
+    pageWidth - 55,
+    signatureY,
+    { align: "center" }
+);
+
+doc.line(
+    pageWidth - 80,
+    signatureY - 5,
+    pageWidth - 30,
+    signatureY - 5
+);
+
+
+
+
+
         // ================= SAVE =================
 
         doc.save(
