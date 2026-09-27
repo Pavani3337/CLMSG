@@ -460,9 +460,9 @@ async function showBookHistory(serial) {
 
                 <td>${record.roll}</td>
 
-                <td>${record.issue_date}</td>
+                <td>${record.issue_date || "-"}</td>
 
-                <td>${record.return_date || "-"}</td>
+		<td>${record.return_date || "-"}</td>
 
                 <td>${record.status}</td>
 
@@ -775,7 +775,7 @@ async function loadIssuedBooks() {
 
                 <td>${book.author || "-"}</td>
 
-                <td>${book.issue_date}</td>
+                ${book.issue_date || "-"}
 
                 <td>${book.due_date || "-"}</td>
 
