@@ -82,6 +82,9 @@ app.get("/api/students", async (req, res) => {
 });
 
 
+
+
+
 // ================= GET STUDENT BY ROLL =================
 
 app.get("/api/students/:roll", async (req, res) => {
@@ -92,35 +95,56 @@ app.get("/api/students/:roll", async (req, res) => {
 
         const [students] =
             await pool.query(
-                "SELECT * FROM students WHERE roll = ? AND is_active = TRUE",
+                `SELECT *
+                 FROM students
+                 WHERE roll = ?
+                 AND is_active = TRUE`,
                 [roll]
             );
 
         if (students.length === 0) {
 
             return res.status(404).json({
-
                 error: "Student not found"
-
             });
 
         }
 
-        res.json(students[0]);
+        const student = students[0];
+
+        const [issuedBooks] =
+            await pool.query(
+                `SELECT COUNT(*) AS count
+                 FROM book_transactions
+                 WHERE student_id = ?
+                 AND status = 'Issued'`,
+                [student.id]
+            );
+
+        res.json({
+
+            ...student,
+
+            issuedBooks: issuedBooks[0].count,
+
+            bookLimit: 4
+
+        });
 
     } catch (error) {
 
         console.error(error);
 
         res.status(500).json({
-
             error: "Failed to fetch student"
-
         });
 
     }
 
 });
+
+
+
 
 
 // ================= ADD STUDENT =================
@@ -475,6 +499,33 @@ app.post("/api/transactions/issue", async (req, res) => {
                 error: "Book is not available"
             });
         }
+
+
+
+
+
+	// Check student's current issued book count
+const [issuedBooks] = await connection.query(
+    `SELECT COUNT(*) AS count
+     FROM book_transactions
+     WHERE student_id = ?
+     AND status = 'Issued'`,
+    [student.id]
+);
+
+const currentIssuedCount = issuedBooks[0].count;
+const MAX_BOOK_LIMIT = 4;
+
+if (currentIssuedCount >= MAX_BOOK_LIMIT) {
+    await connection.rollback();
+
+    return res.status(400).json({
+        error: "Book issue limit reached. A student can have a maximum of 4 books."
+    });
+}
+
+
+
 
         // Check whether this student already has this book
         const [activeIssue] = await connection.query(

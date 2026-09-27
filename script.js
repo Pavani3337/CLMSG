@@ -709,6 +709,9 @@ async function showProfile(roll) {
         document.getElementById("profileBranch").innerText =
             "Branch: " + currentStudent.branch;
 
+	document.getElementById("bookLimit").textContent =
+    "Books Issued: " + data.issuedBooks + " / " + data.bookLimit;
+
         document.getElementById("profilePhoto").src =
             currentStudent.photo ||
             "https://via.placeholder.com/120";
