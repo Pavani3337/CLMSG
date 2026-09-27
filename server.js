@@ -5,6 +5,13 @@ const pool = require("./db");
 
 const app = express();
 
+
+const crypto = require("crypto");
+
+const otpStore = new Map();
+
+
+
 app.use(cors());
 app.use(express.json());
 
@@ -1261,5 +1268,139 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(
         `CLMSG Backend running at http://10.49.217.244:${PORT}`
     );
+
+});
+
+
+
+
+
+
+
+
+app.post("/api/student/send-otp", async (req, res) => {
+
+    try {
+
+        const { roll, phone } = req.body;
+
+        if (!roll || !phone) {
+            return res.status(400).json({
+                message: "Roll number and mobile number are required"
+            });
+        }
+
+        const [students] = await pool.query(
+            "SELECT id, name, roll, phone, branch FROM students WHERE roll = ? AND phone = ? AND is_active = TRUE",
+            [roll, phone]
+        );
+
+        if (students.length === 0) {
+            return res.status(404).json({
+                message: "Student not found"
+            });
+        }
+
+        const student = students[0];
+
+        const otp = crypto
+            .randomInt(100000, 1000000)
+            .toString();
+
+        otpStore.set(roll, {
+            otp: otp,
+            expires: Date.now() + 5 * 60 * 1000
+        });
+
+        console.log("Development OTP for", roll, ":", otp);
+
+        res.json({
+            success: true,
+            message: "OTP generated successfully"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Server error"
+        });
+
+    }
+
+});
+
+
+
+
+
+
+
+app.post("/api/student/verify-otp", async (req, res) => {
+
+    try {
+
+        const { roll, otp } = req.body;
+
+        if (!roll || !otp) {
+            return res.status(400).json({
+                message: "Roll number and OTP are required"
+            });
+        }
+
+        const savedOTP = otpStore.get(roll);
+
+        if (!savedOTP) {
+            return res.status(400).json({
+                message: "OTP not found or expired"
+            });
+        }
+
+        if (Date.now() > savedOTP.expires) {
+
+            otpStore.delete(roll);
+
+            return res.status(400).json({
+                message: "OTP expired"
+            });
+
+        }
+
+        if (savedOTP.otp !== otp) {
+            return res.status(400).json({
+                message: "Invalid OTP"
+            });
+        }
+
+        otpStore.delete(roll);
+
+        const [students] = await pool.query(
+            `SELECT id, name, roll, phone, branch
+             FROM students
+             WHERE roll = ? AND is_active = TRUE`,
+            [roll]
+        );
+
+        if (students.length === 0) {
+            return res.status(404).json({
+                message: "Student not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            student: students[0]
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Server error"
+        });
+
+    }
 
 });

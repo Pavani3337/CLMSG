@@ -139,116 +139,112 @@ let demoOTP = "";
 
 /* SEND OTP */
 
-function sendOTP() {
+async function sendOTP() {
 
     const roll =
-        document
-        .getElementById("studentRoll")
-        .value
-        .trim();
+        document.getElementById("studentRoll").value.trim();
 
     const phone =
-        document
-        .getElementById("studentPhone")
-        .value
-        .trim();
-
+        document.getElementById("studentPhone").value.trim();
 
     if (!roll || !phone) {
-
-        alert(
-            "Please enter Roll Number and Registered Mobile Number."
-        );
-
+        alert("Please enter Roll Number and Registered Mobile Number.");
         return;
     }
 
+    try {
 
-    /*
-       Temporary UI test only.
+        const response = await fetch(
+            "http://10.49.217.244:5000/api/student/send-otp",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    roll: roll,
+                    phone: phone
+                })
+            }
+        );
 
-       Real OTP generation and SMS
-       will be connected to Node.js
-       in the next step.
-    */
+        const data = await response.json();
 
-    demoOTP =
-        Math.floor(
-            100000 +
-            Math.random() * 900000
-        ).toString();
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
 
+        document.getElementById("otpSection").style.display = "block";
 
-    document
-        .getElementById("otpSection")
-        .style.display = "block";
+        alert("OTP generated. Check the Node.js terminal.");
 
+    } catch (error) {
 
-    alert(
-        "Demo OTP: " + demoOTP
-    );
+        alert("Unable to connect to CLMSG server.");
 
+        console.error(error);
+
+    }
 }
-
 
 /* VERIFY OTP */
 
-function verifyOTP() {
-
-    const otp =
-        document
-        .getElementById("studentOTP")
-        .value
-        .trim();
-
-
-    if (!otp) {
-
-        alert("Please enter OTP.");
-
-        return;
-    }
-
-
-    if (otp !== demoOTP) {
-
-        alert("Invalid OTP.");
-
-        return;
-    }
-
+async function verifyOTP() {
 
     const roll =
-        document
-        .getElementById("studentRoll")
-        .value
-        .trim();
+        document.getElementById("studentRoll").value.trim();
 
+    const otp =
+        document.getElementById("studentOTP").value.trim();
 
-    document
-        .getElementById("loginSection")
-        .style.display = "none";
+    if (!otp) {
+        alert("Please enter OTP.");
+        return;
+    }
 
+    try {
 
-    document
-        .getElementById("studentDashboard")
-        .style.display = "block";
+        const response = await fetch(
+            "http://10.49.217.244:5000/api/student/verify-otp",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    roll: roll,
+                    otp: otp
+                })
+            }
+        );
 
+        const data = await response.json();
 
-    document
-        .getElementById("studentDetails")
-        .innerHTML =
-        "<p>Roll Number: " +
-        roll +
-        "</p>";
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
 
+        document.getElementById("loginSection").style.display = "none";
 
-    alert(
-        "Student login successful."
-    );
+        document.getElementById("studentDashboard").style.display = "block";
 
+        document.getElementById("studentDetails").innerHTML =
+            "<p>Name: " + data.student.name + "</p>" +
+            "<p>Roll Number: " + data.student.roll + "</p>" +
+            "<p>Branch: " + data.student.branch + "</p>";
+
+        alert("Student login successful.");
+
+    } catch (error) {
+
+        alert("Unable to connect to CLMSG server.");
+
+        console.error(error);
+
+    }
 }
-
 
 /* LOGOUT */
 
