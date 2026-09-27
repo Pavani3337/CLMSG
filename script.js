@@ -372,6 +372,8 @@ async function searchBook() {
 }
 
 
+
+
 // ================= BOOK HISTORY =================
 
 async function showBookHistory(serial) {
@@ -389,18 +391,40 @@ async function showBookHistory(serial) {
 
     try {
 
-        const response =
-            await fetch(
-                API +
-                "/books/" +
-                encodeURIComponent(serial) +
-                "/history"
-            );
+        const [bookResponse, historyResponse] =
+            await Promise.all([
+
+                fetch(
+                    API +
+                    "/books/" +
+                    encodeURIComponent(serial)
+                ),
+
+                fetch(
+                    API +
+                    "/books/" +
+                    encodeURIComponent(serial) +
+                    "/history"
+                )
+            ]);
+
+        const book =
+            await bookResponse.json();
 
         const records =
-            await response.json();
+            await historyResponse.json();
 
-        if (!response.ok) {
+        if (!bookResponse.ok) {
+
+            alert(
+                book.error ||
+                "Failed to load book"
+            );
+
+            return;
+        }
+
+        if (!historyResponse.ok) {
 
             alert(
                 records.error ||
@@ -408,6 +432,19 @@ async function showBookHistory(serial) {
             );
 
             return;
+        }
+
+        // Display book name beside the heading
+        const title =
+            document.querySelector(
+                "#bookHistorySection h2"
+            );
+
+        if (title) {
+
+            title.textContent =
+                "Book Borrowing History — " +
+                book.name;
         }
 
         records.forEach((record, index) => {
@@ -444,6 +481,8 @@ async function showBookHistory(serial) {
         );
     }
 }
+
+
 
 // ================= DELETE BOOK =================
 
