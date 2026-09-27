@@ -374,7 +374,7 @@ async function searchBook() {
 
 // ================= BOOK HISTORY =================
 
-function showBookHistory(serial) {
+async function showBookHistory(serial) {
 
     hideSections();
 
@@ -382,42 +382,68 @@ function showBookHistory(serial) {
         .getElementById("bookHistorySection")
         .classList.remove("hidden");
 
-    const history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
-
-    const records =
-        history.filter(h => h.serial === serial);
-
     const table =
         document.getElementById("bookHistoryTable");
 
     table.innerHTML = "";
 
-    records.forEach((record, index) => {
+    try {
 
-        const row =
-            document.createElement("tr");
+        const response =
+            await fetch(
+                API +
+                "/books/" +
+                encodeURIComponent(serial) +
+                "/history"
+            );
 
-        row.innerHTML = `
+        const records =
+            await response.json();
 
-            <td>${index + 1}</td>
+        if (!response.ok) {
 
-            <td>${record.studentName}</td>
+            alert(
+                records.error ||
+                "Failed to load book history"
+            );
 
-            <td>${record.roll}</td>
+            return;
+        }
 
-            <td>${record.issueDate}</td>
+        records.forEach((record, index) => {
 
-            <td>${record.returnDate || "-"}</td>
+            const row =
+                document.createElement("tr");
 
-            <td>${record.status}</td>
+            row.innerHTML = `
 
-        `;
+                <td>${index + 1}</td>
 
-        table.appendChild(row);
-    });
+                <td>${record.student_name}</td>
+
+                <td>${record.roll}</td>
+
+                <td>${record.issue_date}</td>
+
+                <td>${record.return_date || "-"}</td>
+
+                <td>${record.status}</td>
+
+            `;
+
+            table.appendChild(row);
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load book history.\n" +
+            "Make sure the backend is running."
+        );
+    }
 }
-
 
 // ================= DELETE BOOK =================
 
