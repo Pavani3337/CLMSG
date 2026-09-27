@@ -1,5 +1,7 @@
 const API = "http://10.49.217.244:5000/api";
 
+const BOOK_LIMIT = 4;
+
 let studentLoggedIn = null;
 let otpStore = null;
 
@@ -56,7 +58,8 @@ window.onload = function () {
 
 function login() {
 
-    const id = document.getElementById("adminId").value.trim();
+    const id =
+        document.getElementById("adminId").value.trim();
 
     const password =
         document.getElementById("adminPassword").value.trim();
@@ -104,7 +107,8 @@ function showSection(id) {
 
     hideSections();
 
-    const section = document.getElementById(id);
+    const section =
+        document.getElementById(id);
 
     if (section) {
         section.classList.remove("hidden");
@@ -118,7 +122,6 @@ function showSection(id) {
 
 // ================= REGISTER STUDENT =================
 
-// ================= REGISTER STUDENT =================
 async function registerStudent() {
 
     const name =
@@ -137,7 +140,9 @@ async function registerStudent() {
         document.getElementById("studentPhoto").files[0];
 
     if (!name || !roll || !phone || !branch || !photoFile) {
+
         alert("Please fill all fields");
+
         return;
     }
 
@@ -147,26 +152,36 @@ async function registerStudent() {
 
         try {
 
-            const response = await fetch(API + "/students", {
-                method: "POST",
+            const response =
+                await fetch(API + "/students", {
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    method: "POST",
 
-                body: JSON.stringify({
-                    name: name,
-                    roll: roll,
-                    phone: phone,
-                    branch: branch,
-                    photo: e.target.result
-                })
-            });
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-            const data = await response.json();
+                    body: JSON.stringify({
+
+                        name: name,
+                        roll: roll,
+                        phone: phone,
+                        branch: branch,
+                        photo: e.target.result
+
+                    })
+                });
+
+            const data =
+                await response.json();
 
             if (!response.ok) {
-                alert(data.error || "Failed to register student");
+
+                alert(
+                    data.error ||
+                    "Failed to register student"
+                );
+
                 return;
             }
 
@@ -189,9 +204,6 @@ async function registerStudent() {
 }
 
 
-
-
-
 // ================= ADD BOOK =================
 
 async function addBook() {
@@ -206,7 +218,9 @@ async function addBook() {
         document.getElementById("bookAuthor").value.trim();
 
     const totalCopies =
-        parseInt(document.getElementById("bookCopies").value);
+        parseInt(
+            document.getElementById("bookCopies").value
+        );
 
     if (!serial || !name || !author || !totalCopies) {
 
@@ -229,20 +243,22 @@ async function addBook() {
                 body: JSON.stringify({
 
                     serial: serial,
-
                     name: name,
-
                     author: author,
-
                     totalCopies: totalCopies
+
                 })
             });
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
-            alert(data.error || "Failed to add book");
+            alert(
+                data.error ||
+                "Failed to add book"
+            );
 
             return;
         }
@@ -250,11 +266,8 @@ async function addBook() {
         alert("Book Added Successfully");
 
         document.getElementById("bookSerial").value = "";
-
         document.getElementById("bookName").value = "";
-
         document.getElementById("bookAuthor").value = "";
-
         document.getElementById("bookCopies").value = "";
 
         loadBooks();
@@ -278,7 +291,6 @@ async function loadBooks() {
             await fetch(API + "/books");
 
         if (!response.ok) {
-
             throw new Error("Failed to fetch books");
         }
 
@@ -291,7 +303,9 @@ async function loadBooks() {
 
         console.error(error);
 
-        alert("Failed to load books. Check backend.");
+        alert(
+            "Failed to load books. Check backend."
+        );
     }
 }
 
@@ -305,7 +319,8 @@ function renderBooks(books) {
     books.forEach(book => {
 
         const issued =
-            book.total_copies - book.available_copies;
+            book.total_copies -
+            book.available_copies;
 
         html += `
         <tr>
@@ -327,7 +342,8 @@ function renderBooks(books) {
             <td>${book.available_copies}</td>
 
             <td>
-                <button onclick="deleteBook('${book.serial}')">
+                <button
+                    onclick="deleteBook('${book.serial}')">
                     Delete
                 </button>
             </td>
@@ -336,7 +352,8 @@ function renderBooks(books) {
         `;
     });
 
-    document.getElementById("booksTable").innerHTML = html;
+    document.getElementById("booksTable").innerHTML =
+        html;
 }
 
 
@@ -360,7 +377,9 @@ async function searchBook() {
 
         const filtered =
             books.filter(book =>
-                book.name.toLowerCase().includes(searchText)
+                book.name
+                    .toLowerCase()
+                    .includes(searchText)
             );
 
         renderBooks(filtered);
@@ -372,6 +391,16 @@ async function searchBook() {
 }
 
 
+// ================= DATE FORMAT =================
+
+function formatDate(date) {
+
+    if (!date) {
+        return "-";
+    }
+
+    return String(date).split("T")[0];
+}
 
 
 // ================= BOOK HISTORY =================
@@ -434,7 +463,6 @@ async function showBookHistory(serial) {
             return;
         }
 
-        // Display book name beside the heading
         const title =
             document.querySelector(
                 "#bookHistorySection h2"
@@ -460,9 +488,9 @@ async function showBookHistory(serial) {
 
                 <td>${record.roll}</td>
 
-                <td>${record.issue_date || "-"}</td>
+                <td>${formatDate(record.issue_date)}</td>
 
-		<td>${record.return_date || "-"}</td>
+                <td>${formatDate(record.return_date)}</td>
 
                 <td>${record.status}</td>
 
@@ -483,7 +511,6 @@ async function showBookHistory(serial) {
 }
 
 
-
 // ================= DELETE BOOK =================
 
 async function deleteBook(serial) {
@@ -496,7 +523,9 @@ async function deleteBook(serial) {
 
         const response =
             await fetch(
-                API + "/books/" + encodeURIComponent(serial),
+                API +
+                "/books/" +
+                encodeURIComponent(serial),
                 {
                     method: "DELETE"
                 }
@@ -507,7 +536,10 @@ async function deleteBook(serial) {
 
         if (!response.ok) {
 
-            alert(data.error || "Failed to delete book");
+            alert(
+                data.error ||
+                "Failed to delete book"
+            );
 
             return;
         }
@@ -527,9 +559,6 @@ async function deleteBook(serial) {
 
 // ================= LOAD STUDENTS =================
 
-
-
-// ================= LOAD STUDENTS =================
 async function loadStudents(branch) {
 
     currentBranch = branch;
@@ -549,7 +578,9 @@ async function loadStudents(branch) {
             await response.json();
 
         if (!response.ok) {
+
             alert("Failed to load students");
+
             return;
         }
 
@@ -584,10 +615,12 @@ function renderStudents(students) {
             document.createElement("tr");
 
         row.innerHTML = `
+
             <td>${index + 1}</td>
 
             <td>
-                <button onclick="showProfile('${student.roll}')">
+                <button
+                    onclick="showProfile('${student.roll}')">
                     ${student.name}
                 </button>
             </td>
@@ -615,9 +648,9 @@ function renderStudents(students) {
     });
 }
 
-// ================= SEARCH STUDENT =================
 
 // ================= SEARCH STUDENT =================
+
 async function searchStudent() {
 
     const search =
@@ -656,9 +689,9 @@ async function searchStudent() {
     }
 }
 
-// ================= STUDENT PROFILE =================
 
 // ================= STUDENT PROFILE =================
+
 async function showProfile(roll) {
 
     if (
@@ -675,7 +708,8 @@ async function showProfile(roll) {
 
         const response =
             await fetch(
-                API + "/students/" +
+                API +
+                "/students/" +
                 encodeURIComponent(roll)
             );
 
@@ -684,7 +718,10 @@ async function showProfile(roll) {
 
         if (!response.ok) {
 
-            alert(student.error || "Student not found");
+            alert(
+                student.error ||
+                "Student not found"
+            );
 
             return;
         }
@@ -701,21 +738,25 @@ async function showProfile(roll) {
             currentStudent.name;
 
         document.getElementById("profileRoll").innerText =
-            "Roll: " + currentStudent.roll;
+            "Roll: " +
+            currentStudent.roll;
 
         document.getElementById("profilePhone").innerText =
-            "Phone: " + currentStudent.phone;
+            "Phone: " +
+            (currentStudent.phone || "-");
 
         document.getElementById("profileBranch").innerText =
-            "Branch: " + currentStudent.branch;
-
-	document.getElementById("bookLimit").textContent =
-    "Books Issued: " + data.issuedBooks + " / " + data.bookLimit;
+            "Branch: " +
+            currentStudent.branch;
 
         document.getElementById("profilePhoto").src =
             currentStudent.photo ||
             "https://via.placeholder.com/120";
 
+        /*
+         * loadIssuedBooks() gets the current
+         * issued count directly from MySQL.
+         */
         await loadIssuedBooks();
 
     } catch (error) {
@@ -725,8 +766,6 @@ async function showProfile(roll) {
         alert("Failed to load student profile");
     }
 }
-
-
 
 
 // ================= LOAD ISSUED BOOKS =================
@@ -765,6 +804,26 @@ async function loadIssuedBooks() {
             return;
         }
 
+        /*
+         * Count ONLY currently issued books.
+         * Returned books are not counted.
+         */
+        const issuedBooks =
+            books.filter(
+                book => book.status === "Issued"
+            ).length;
+
+        // ================= UPDATE LIMIT =================
+
+        document.getElementById("bookLimit").textContent =
+            "Books Issued: " +
+            issuedBooks +
+            " / " +
+            BOOK_LIMIT;
+
+
+        // ================= DISPLAY BOOKS =================
+
         books.forEach((book, index) => {
 
             const row =
@@ -774,17 +833,17 @@ async function loadIssuedBooks() {
 
                 <td>${index + 1}</td>
 
-<td>${book.book_name}</td>
+                <td>${book.book_name}</td>
 
-<td>${book.author || "-"}</td>
+                <td>${book.author || "-"}</td>
 
-<td>${book.issue_date || "-"}</td>
+                <td>${formatDate(book.issue_date)}</td>
 
-<td>${book.due_date || "-"}</td>
+                <td>${formatDate(book.due_date)}</td>
 
-<td>${book.status}</td>
+                <td>${book.status}</td>
 
-<td>${book.return_date || "-"}</td>
+                <td>${formatDate(book.return_date)}</td>
 
                 <td>
 
@@ -793,7 +852,8 @@ async function loadIssuedBooks() {
 
                         ?
 
-                        `<button onclick="returnBook(${book.transaction_id})">
+                        `<button
+                            onclick="returnBook(${book.transaction_id})">
                             Return
                         </button>`
 
@@ -810,6 +870,12 @@ async function loadIssuedBooks() {
 
         });
 
+        /*
+         * If the student has already reached
+         * the limit, disable Issue Book button.
+         */
+        updateIssueButton(issuedBooks);
+
     } catch (error) {
 
         console.error(error);
@@ -821,18 +887,110 @@ async function loadIssuedBooks() {
     }
 }
 
+
+// ================= UPDATE ISSUE BUTTON =================
+
+function updateIssueButton(issuedBooks) {
+
+    const buttons =
+        document.querySelectorAll(
+            '#profileSection > button[onclick="showIssueBook()"]'
+        );
+
+    buttons.forEach(button => {
+
+        if (issuedBooks >= BOOK_LIMIT) {
+
+            button.disabled = true;
+
+            button.textContent =
+                "Book Limit Reached (4 / 4)";
+
+        } else {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Issue Book";
+        }
+    });
+}
+
+
 // ================= SHOW ISSUE BOOK =================
 
-function showIssueBook() {
+async function showIssueBook() {
 
-    document
-        .getElementById("issueArea")
-        .classList.remove("hidden");
+    if (!currentStudent) {
+        return;
+    }
 
-    document.getElementById("issueDate").value =
-        new Date().toISOString().split("T")[0];
+    /*
+     * Get the latest history from MySQL
+     * before allowing a new issue.
+     */
+    try {
 
-    loadBookOptions();
+        const response =
+            await fetch(
+                API +
+                "/students/" +
+                encodeURIComponent(currentStudent.roll) +
+                "/history"
+            );
+
+        const history =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                history.error ||
+                "Unable to check book limit"
+            );
+
+            return;
+        }
+
+        const issuedBooks =
+            history.filter(
+                book => book.status === "Issued"
+            ).length;
+
+        document.getElementById("bookLimit").textContent =
+            "Books Issued: " +
+            issuedBooks +
+            " / " +
+            BOOK_LIMIT;
+
+        if (issuedBooks >= BOOK_LIMIT) {
+
+            alert(
+                "This student has reached the maximum book issue limit of 4."
+            );
+
+            updateIssueButton(issuedBooks);
+
+            return;
+        }
+
+        document
+            .getElementById("issueArea")
+            .classList.remove("hidden");
+
+        document.getElementById("issueDate").value =
+            new Date()
+                .toISOString()
+                .split("T")[0];
+
+        loadBookOptions();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to check book limit");
+    }
 }
 
 
@@ -854,13 +1012,16 @@ async function loadBookOptions() {
             await response.json();
 
         books
-            .filter(book => book.available_copies > 0)
+            .filter(
+                book => book.available_copies > 0
+            )
             .forEach(book => {
 
                 const option =
                     document.createElement("option");
 
-                option.value = book.serial;
+                option.value =
+                    book.serial;
 
                 option.textContent =
                     book.name +
@@ -871,6 +1032,7 @@ async function loadBookOptions() {
                     " available)";
 
                 select.appendChild(option);
+
             });
 
     } catch (error) {
@@ -907,15 +1069,21 @@ async function searchBooks() {
 
         books
             .filter(book =>
+
                 book.available_copies > 0 &&
-                book.name.toLowerCase().includes(search)
+
+                book.name
+                    .toLowerCase()
+                    .includes(search)
+
             )
             .forEach(book => {
 
                 const option =
                     document.createElement("option");
 
-                option.value = book.serial;
+                option.value =
+                    book.serial;
 
                 option.textContent =
                     book.name +
@@ -926,6 +1094,7 @@ async function searchBooks() {
                     " available)";
 
                 select.appendChild(option);
+
             });
 
     } catch (error) {
@@ -936,14 +1105,13 @@ async function searchBooks() {
 
 
 // ================= ISSUE BOOK =================
-// Temporary localStorage version.
-// This will be replaced by MySQL transaction API next.
-
 
 async function issueBook() {
 
     if (!currentStudent) {
+
         alert("Select a student first");
+
         return;
     }
 
@@ -957,31 +1125,88 @@ async function issueBook() {
         document.getElementById("dueDate").value;
 
     if (!serial || !issueDate || !dueDate) {
+
         alert("Please select book and dates");
+
         return;
     }
 
     try {
 
-        const response = await fetch(
-            API + "/transactions/issue",
-            {
-                method: "POST",
+        /*
+         * Check current limit immediately before issuing.
+         */
+        const historyResponse =
+            await fetch(
+                API +
+                "/students/" +
+                encodeURIComponent(currentStudent.roll) +
+                "/history"
+            );
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+        const history =
+            await historyResponse.json();
 
-                body: JSON.stringify({
-                    roll: currentStudent.roll,
-                    serial: serial,
-                    issueDate: issueDate,
-                    dueDate: dueDate
-                })
-            }
-        );
+        if (!historyResponse.ok) {
 
-        const data = await response.json();
+            alert(
+                history.error ||
+                "Unable to check book limit"
+            );
+
+            return;
+        }
+
+        const issuedBooks =
+            history.filter(
+                book => book.status === "Issued"
+            ).length;
+
+        if (issuedBooks >= BOOK_LIMIT) {
+
+            alert(
+                "Book issue limit reached.\n" +
+                "Maximum allowed: 4 books."
+            );
+
+            await showProfile(currentStudent.roll);
+
+            return;
+        }
+
+
+        // ================= ISSUE API =================
+
+        const response =
+            await fetch(
+                API + "/transactions/issue",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        roll:
+                            currentStudent.roll,
+
+                        serial:
+                            serial,
+
+                        issueDate:
+                            issueDate,
+
+                        dueDate:
+                            dueDate
+
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
@@ -990,14 +1215,25 @@ async function issueBook() {
                 "Failed to issue book"
             );
 
+            /*
+             * Refresh profile because the backend
+             * may have rejected the transaction.
+             */
+            await showProfile(currentStudent.roll);
+
             return;
         }
 
         alert("Book issued successfully");
 
-        document.getElementById("issueArea")
+        document
+            .getElementById("issueArea")
             .classList.add("hidden");
 
+        /*
+         * Refresh books and student profile.
+         * This automatically changes 2/4 → 3/4 etc.
+         */
         await loadBooks();
 
         await showProfile(currentStudent.roll);
@@ -1014,10 +1250,7 @@ async function issueBook() {
 }
 
 
-
 // ================= RETURN BOOK =================
-// Temporary placeholder.
-// MySQL return transaction will be connected next.
 
 async function returnBook(transactionId) {
 
@@ -1026,7 +1259,9 @@ async function returnBook(transactionId) {
     }
 
     const returnDate =
-        new Date().toISOString().split("T")[0];
+        new Date()
+            .toISOString()
+            .split("T")[0];
 
     if (!confirm("Return this book?")) {
         return;
@@ -1045,8 +1280,13 @@ async function returnBook(transactionId) {
                     },
 
                     body: JSON.stringify({
-                        transactionId: transactionId,
-                        returnDate: returnDate
+
+                        transactionId:
+                            transactionId,
+
+                        returnDate:
+                            returnDate
+
                     })
                 }
             );
@@ -1066,6 +1306,13 @@ async function returnBook(transactionId) {
 
         alert("Book returned successfully");
 
+        /*
+         * Refresh everything.
+         *
+         * Example:
+         * Before return: 4 / 4
+         * After return : 3 / 4
+         */
         await loadBooks();
 
         await showProfile(currentStudent.roll);
@@ -1080,6 +1327,7 @@ async function returnBook(transactionId) {
         );
     }
 }
+
 
 // ================= UPDATE BOOK STATUS =================
 
@@ -1117,7 +1365,9 @@ async function deleteStudent(studentId) {
 
         const response =
             await fetch(
-                API + "/students/" + studentId,
+                API +
+                "/students/" +
+                studentId,
                 {
                     method: "DELETE"
                 }
@@ -1153,7 +1403,7 @@ async function deleteStudent(studentId) {
 
 
 // =====================================================
-//                    QR CODE FEATURE
+// QR CODE FEATURE
 // =====================================================
 
 function generateStudentQR(roll) {
@@ -1174,7 +1424,9 @@ function generateStudentQR(roll) {
 
     if (!qrWindow) {
 
-        alert("Please allow pop-ups for this website.");
+        alert(
+            "Please allow pop-ups for this website."
+        );
 
         return;
     }
@@ -1258,15 +1510,14 @@ button {
 
 <script>
 
-new QRCode(document.getElementById("qrcode"), {
-
-    text: ${JSON.stringify(profileURL)},
-
-    width: 256,
-
-    height: 256
-
-});
+new QRCode(
+    document.getElementById("qrcode"),
+    {
+        text: ${JSON.stringify(profileURL)},
+        width: 256,
+        height: 256
+    }
+);
 
 </script>
 
@@ -1280,12 +1531,6 @@ new QRCode(document.getElementById("qrcode"), {
 }
 
 
-
-
-
-
-
-
 // ================= IMPORT STUDENTS =================
 
 async function importStudents() {
@@ -1295,11 +1540,16 @@ async function importStudents() {
 
     try {
 
-        const response = await fetch(url);
-        const data = await response.json();
+        const response =
+            await fetch(url);
+
+        const data =
+            await response.json();
 
         if (!Array.isArray(data)) {
+
             alert("Invalid student data");
+
             return;
         }
 
@@ -1332,11 +1582,12 @@ async function importStudents() {
                 continue;
             }
 
-            // Convert Google Drive photo URL
             if (photo.includes("id=")) {
 
                 const id =
-                    photo.split("id=")[1].split("&")[0];
+                    photo
+                        .split("id=")[1]
+                        .split("&")[0];
 
                 photo =
                     "https://drive.google.com/thumbnail?id=" +
@@ -1344,7 +1595,7 @@ async function importStudents() {
                     "&sz=w500";
             }
 
-            // ================= CHECK DELETED STUDENT =================
+            // ================= CHECK DELETED =================
 
             const deletedResponse =
                 await fetch(
@@ -1357,54 +1608,44 @@ async function importStudents() {
 
                 deletedCount++;
 
-                console.log(
-                    "Student was deleted from CLMSG:",
-                    roll
-                );
-
                 continue;
             }
 
             // ================= SEND TO MYSQL =================
 
             const mysqlResponse =
-                await fetch(API + "/students", {
+                await fetch(
+                    API + "/students",
+                    {
+                        method: "POST",
 
-                    method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                        body: JSON.stringify({
 
-                    body: JSON.stringify({
+                            name: name,
+                            roll: roll,
+                            phone: phone,
+                            branch: branch,
+                            photo: photo || null
 
-                        name: name,
-                        roll: roll,
-                        phone: phone,
-                        branch: branch,
-                        photo: photo || null
-
-                    })
-
-                });
+                        })
+                    }
+                );
 
             const mysqlData =
                 await mysqlResponse.json();
 
-            // Student already exists
             if (mysqlResponse.status === 409) {
 
                 existingCount++;
 
-                console.log(
-                    "Student already exists:",
-                    roll
-                );
-
                 continue;
             }
 
-            // Other error
             if (!mysqlResponse.ok) {
 
                 console.error(
@@ -1428,7 +1669,6 @@ async function importStudents() {
             " deleted students skipped."
         );
 
-        // Load students from MySQL
         await loadStudentsFromDatabase();
 
     } catch (error) {
@@ -1443,15 +1683,8 @@ async function importStudents() {
 }
 
 
-
-
-
-
-
-
-
-
 // ================= LOAD STUDENTS FROM MYSQL =================
+
 async function loadStudentsFromDatabase() {
 
     try {
@@ -1469,7 +1702,6 @@ async function loadStudentsFromDatabase() {
         const students =
             await response.json();
 
-        // Keep frontend temporarily synchronized
         localStorage.setItem(
             "students",
             JSON.stringify(students)
@@ -1478,7 +1710,6 @@ async function loadStudentsFromDatabase() {
         if (currentBranch) {
 
             loadStudents(currentBranch);
-
         }
 
     } catch (error) {
@@ -1490,12 +1721,6 @@ async function loadStudentsFromDatabase() {
         );
     }
 }
-
-
-
-
-
-
 
 
 // ================= STUDENT OTP =================
@@ -1515,7 +1740,9 @@ function sendStudentOTP() {
             .trim();
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
     const student =
         students.find(s =>
@@ -1531,8 +1758,10 @@ function sendStudentOTP() {
     }
 
     const otp =
-        Math.floor(1000 + Math.random() * 9000)
-            .toString();
+        Math.floor(
+            1000 +
+            Math.random() * 9000
+        ).toString();
 
     otpStore = {
 
@@ -1557,7 +1786,9 @@ function verifyStudentOTP() {
 
     if (!otpStore) {
 
-        alert("Please request OTP first");
+        alert(
+            "Please request OTP first"
+        );
 
         return;
     }
@@ -1570,7 +1801,9 @@ function verifyStudentOTP() {
     }
 
     const students =
-        JSON.parse(localStorage.getItem("students")) || [];
+        JSON.parse(
+            localStorage.getItem("students")
+        ) || [];
 
     studentLoggedIn =
         students.find(s =>
@@ -1602,7 +1835,9 @@ function downloadMyReport() {
     }
 
     const history =
-        JSON.parse(localStorage.getItem("bookHistory")) || [];
+        JSON.parse(
+            localStorage.getItem("bookHistory")
+        ) || [];
 
     const myRecords =
         history.filter(h =>
@@ -1664,11 +1899,12 @@ function downloadMyReport() {
 }
 
 
+// =====================================================
+// LIBRARY REPORTS
+// =====================================================
 
 
-
-
-// ================= LIBRARY REPORTS =================
+// ================= SINGLE DATE REPORT =================
 
 async function generateSingleReport() {
 
@@ -1684,7 +1920,10 @@ async function generateSingleReport() {
         return;
     }
 
-    await generateLibraryReport(date, date);
+    await generateLibraryReport(
+        date,
+        date
+    );
 }
 
 
@@ -1704,19 +1943,86 @@ async function generateRangeReport() {
 
     if (!fromDate || !toDate) {
 
-        alert("Please select both dates");
+        alert(
+            "Please select both dates"
+        );
 
         return;
     }
 
     if (fromDate > toDate) {
 
-        alert("From date cannot be after To date");
+        alert(
+            "From date cannot be after To date"
+        );
 
         return;
     }
 
-    await generateLibraryReport(fromDate, toDate);
+    await generateLibraryReport(
+        fromDate,
+        toDate
+    );
+}
+
+
+// ================= GET CURRENT BORROWING COUNTS =================
+
+async function getCurrentBorrowingCounts(logs) {
+
+    const rolls =
+        [
+            ...new Set(
+                logs
+                    .map(log => log.roll)
+                    .filter(Boolean)
+            )
+        ];
+
+    const counts = {};
+
+    await Promise.all(
+
+        rolls.map(async roll => {
+
+            try {
+
+                const response =
+                    await fetch(
+                        API +
+                        "/students/" +
+                        encodeURIComponent(roll) +
+                        "/history"
+                    );
+
+                const history =
+                    await response.json();
+
+                if (!response.ok) {
+                    counts[roll] = 0;
+                    return;
+                }
+
+                counts[roll] =
+                    history.filter(
+                        book =>
+                            book.status === "Issued"
+                    ).length;
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to get count for",
+                    roll,
+                    error
+                );
+
+                counts[roll] = 0;
+            }
+        })
+    );
+
+    return counts;
 }
 
 
@@ -1748,7 +2054,23 @@ async function generateLibraryReport(from, to) {
             return;
         }
 
-        currentReport = data;
+        /*
+         * Get the current borrowing count
+         * of every student appearing in the report.
+         */
+        const borrowingCounts =
+            await getCurrentBorrowingCounts(
+                data.logs || []
+            );
+
+        data.borrowingCounts =
+            borrowingCounts;
+
+        data.bookLimit =
+            BOOK_LIMIT;
+
+        currentReport =
+            data;
 
         let output =
             "COLLEGE LIBRARY MANAGEMENT SYSTEM\n";
@@ -1769,10 +2091,18 @@ async function generateLibraryReport(from, to) {
         output +=
             "Total Activities: " +
             data.total +
+            "\n";
+
+        output +=
+            "Maximum Books Per Student: " +
+            BOOK_LIMIT +
             "\n\n";
 
 
-        if (!data.logs || data.logs.length === 0) {
+        if (
+            !data.logs ||
+            data.logs.length === 0
+        ) {
 
             output +=
                 "No library activity found for the selected date(s).";
@@ -1780,6 +2110,9 @@ async function generateLibraryReport(from, to) {
         } else {
 
             data.logs.forEach((log, index) => {
+
+                const currentCount =
+                    borrowingCounts[log.roll] || 0;
 
                 output +=
                     (index + 1) +
@@ -1793,6 +2126,10 @@ async function generateLibraryReport(from, to) {
                     log.roll +
                     " | " +
                     log.book_name +
+                    " | Current Books: " +
+                    currentCount +
+                    "/" +
+                    BOOK_LIMIT +
                     "\n";
             });
         }
@@ -1813,52 +2150,87 @@ async function generateLibraryReport(from, to) {
 }
 
 
-
-
-// ================= DOWNLOAD REPORT =================
+// =====================================================
+// DOWNLOAD PDF REPORT
+// =====================================================
 
 function downloadReport() {
 
-    if (!currentReport || !currentReport.logs) {
+    if (
+        !currentReport ||
+        !currentReport.logs
+    ) {
 
-        alert("Please generate a report first");
+        alert(
+            "Please generate a report first"
+        );
 
         return;
     }
 
-    const { jsPDF } = window.jspdf;
+    const { jsPDF } =
+        window.jspdf;
 
-    const doc = new jsPDF();
+    const doc =
+        new jsPDF();
 
-    const logs = currentReport.logs;
+    const logs =
+        currentReport.logs;
 
     const issued =
-        logs.filter(log => log.operation === "Issued");
+        logs.filter(
+            log =>
+                log.operation === "Issued"
+        );
 
     const returned =
-        logs.filter(log => log.operation === "Returned");
+        logs.filter(
+            log =>
+                log.operation === "Returned"
+        );
 
     const dates =
-        [...new Set(logs.map(log => log.date))].sort();
+        [
+            ...new Set(
+                logs.map(
+                    log => log.date
+                )
+            )
+        ].sort();
 
-    const logo = new Image();
+    const borrowingCounts =
+        currentReport.borrowingCounts ||
+        {};
 
-    logo.src = "logo.png";
+    const logo =
+        new Image();
 
-    logo.onload = function () {
+    logo.src =
+        "logo.png";
 
-        createReport(doc, logo);
+    logo.onload =
+        function () {
 
-    };
+            createReport(
+                doc,
+                logo
+            );
+        };
 
-    logo.onerror = function () {
+    logo.onerror =
+        function () {
 
-        createReport(doc, null);
+            createReport(
+                doc,
+                null
+            );
+        };
 
-    };
 
-
-    function createReport(doc, logo) {
+    function createReport(
+        doc,
+        logo
+    ) {
 
         // ================= HEADER =================
 
@@ -1880,7 +2252,9 @@ function downloadReport() {
             "UCEN JNTUK",
             105,
             58,
-            { align: "center" }
+            {
+                align: "center"
+            }
         );
 
         doc.setFontSize(14);
@@ -1889,7 +2263,9 @@ function downloadReport() {
             "Central Library",
             105,
             67,
-            { align: "center" }
+            {
+                align: "center"
+            }
         );
 
         doc.setFontSize(16);
@@ -1898,9 +2274,10 @@ function downloadReport() {
             "Library Activity Report",
             105,
             77,
-            { align: "center" }
+            {
+                align: "center"
+            }
         );
-
 
         // ================= GENERATED DATE =================
 
@@ -1911,7 +2288,9 @@ function downloadReport() {
             new Date().toLocaleString(),
             105,
             87,
-            { align: "center" }
+            {
+                align: "center"
+            }
         );
 
 
@@ -1948,32 +2327,48 @@ function downloadReport() {
 
 
         let y =
-            doc.lastAutoTable.finalY + 15;
+            doc.lastAutoTable.finalY +
+            15;
+
+
+        // ================= LIMIT INFORMATION =================
+
+        doc.setFontSize(10);
+
+        doc.text(
+            "Maximum Books Per Student: " +
+            BOOK_LIMIT,
+            14,
+            y
+        );
+
+        y += 12;
 
 
         // ================= DATE-WISE REPORT =================
 
-        dates.forEach((date, dateIndex) => {
+        dates.forEach(date => {
 
             const dateLogs =
-                logs.filter(log =>
-                    log.date === date
+                logs.filter(
+                    log =>
+                        log.date === date
                 );
 
             const dateIssued =
-                dateLogs.filter(log =>
-                    log.operation === "Issued"
+                dateLogs.filter(
+                    log =>
+                        log.operation === "Issued"
                 );
 
             const dateReturned =
-                dateLogs.filter(log =>
-                    log.operation === "Returned"
+                dateLogs.filter(
+                    log =>
+                        log.operation === "Returned"
                 );
 
 
-            // New page if required
-
-            if (y > 240) {
+            if (y > 235) {
 
                 doc.addPage();
 
@@ -2024,19 +2419,33 @@ function downloadReport() {
                     head: [[
                         "Issued Book",
                         "Student Name",
-                        "Roll Number"
+                        "Roll Number",
+                        "Current Books"
                     ]],
 
                     body:
-                        dateIssued.map(log => [
+                        dateIssued.map(
+                            log => [
 
-                            log.book_name || "-",
+                                log.book_name ||
+                                    "-",
 
-                            log.student_name || "-",
+                                log.student_name ||
+                                    "-",
 
-                            log.roll || "-"
+                                log.roll ||
+                                    "-",
 
-                        ]),
+                                (
+                                    borrowingCounts[
+                                        log.roll
+                                    ] || 0
+                                ) +
+                                "/" +
+                                BOOK_LIMIT
+
+                            ]
+                        ),
 
                     theme: "grid",
 
@@ -2047,7 +2456,8 @@ function downloadReport() {
                 });
 
                 y =
-                    doc.lastAutoTable.finalY + 12;
+                    doc.lastAutoTable.finalY +
+                    12;
             }
 
 
@@ -2055,7 +2465,7 @@ function downloadReport() {
 
             if (dateReturned.length > 0) {
 
-                if (y > 240) {
+                if (y > 235) {
 
                     doc.addPage();
 
@@ -2069,19 +2479,33 @@ function downloadReport() {
                     head: [[
                         "Returned Book",
                         "Student Name",
-                        "Roll Number"
+                        "Roll Number",
+                        "Current Books"
                     ]],
 
                     body:
-                        dateReturned.map(log => [
+                        dateReturned.map(
+                            log => [
 
-                            log.book_name || "-",
+                                log.book_name ||
+                                    "-",
 
-                            log.student_name || "-",
+                                log.student_name ||
+                                    "-",
 
-                            log.roll || "-"
+                                log.roll ||
+                                    "-",
 
-                        ]),
+                                (
+                                    borrowingCounts[
+                                        log.roll
+                                    ] || 0
+                                ) +
+                                "/" +
+                                BOOK_LIMIT
+
+                            ]
+                        ),
 
                     theme: "grid",
 
@@ -2092,52 +2516,50 @@ function downloadReport() {
                 });
 
                 y =
-                    doc.lastAutoTable.finalY + 12;
+                    doc.lastAutoTable.finalY +
+                    12;
             }
 
         });
 
 
+        // ================= LIBRARIAN SIGNATURE =================
 
+        const pageHeight =
+            doc.internal.pageSize.getHeight();
 
+        const pageWidth =
+            doc.internal.pageSize.getWidth();
 
+        if (
+            y >
+            pageHeight - 50
+        ) {
 
+            doc.addPage();
+        }
 
-// ================= LIBRARIAN SIGNATURE =================
+        const signatureY =
+            doc.internal.pageSize.getHeight() -
+            25;
 
-const pageHeight =
-    doc.internal.pageSize.getHeight();
+        doc.setFontSize(10);
 
-const pageWidth =
-    doc.internal.pageSize.getWidth();
+        doc.text(
+            "Librarian Signature",
+            pageWidth - 55,
+            signatureY,
+            {
+                align: "center"
+            }
+        );
 
-if (y > pageHeight - 50) {
-
-    doc.addPage();
-
-}
-
-const signatureY =
-    doc.internal.pageSize.getHeight() - 25;
-
-doc.setFontSize(10);
-
-doc.text(
-    "Librarian Signature",
-    pageWidth - 55,
-    signatureY,
-    { align: "center" }
-);
-
-doc.line(
-    pageWidth - 80,
-    signatureY - 5,
-    pageWidth - 30,
-    signatureY - 5
-);
-
-
-
+        doc.line(
+            pageWidth - 80,
+            signatureY - 5,
+            pageWidth - 30,
+            signatureY - 5
+        );
 
 
         // ================= SAVE =================
