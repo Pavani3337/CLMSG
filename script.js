@@ -771,17 +771,17 @@ async function loadIssuedBooks() {
 
                 <td>${index + 1}</td>
 
-                <td>${book.book_name}</td>
+<td>${book.book_name}</td>
 
-                <td>${book.author || "-"}</td>
+<td>${book.author || "-"}</td>
 
-                ${book.issue_date || "-"}
+<td>${book.issue_date || "-"}</td>
 
-                <td>${book.due_date || "-"}</td>
+<td>${book.due_date || "-"}</td>
 
-                <td>${book.status}</td>
+<td>${book.status}</td>
 
-                <td>${book.return_date || "-"}</td>
+<td>${book.return_date || "-"}</td>
 
                 <td>
 
@@ -1658,4 +1658,282 @@ function downloadMyReport() {
     link.click();
 
     URL.revokeObjectURL(link.href);
+}
+
+
+
+
+
+
+// ================= LIBRARY REPORTS =================
+
+async function generateSingleReport() {
+
+    const date =
+        document
+            .getElementById("singleReportDate")
+            .value;
+
+    if (!date) {
+
+        alert("Please select a date");
+
+        return;
+    }
+
+    await generateLibraryReport(date, date);
+}
+
+
+// ================= DATE RANGE REPORT =================
+
+async function generateRangeReport() {
+
+    const fromDate =
+        document
+            .getElementById("fromDate")
+            .value;
+
+    const toDate =
+        document
+            .getElementById("toDate")
+            .value;
+
+    if (!fromDate || !toDate) {
+
+        alert("Please select both dates");
+
+        return;
+    }
+
+    if (fromDate > toDate) {
+
+        alert("From date cannot be after To date");
+
+        return;
+    }
+
+    await generateLibraryReport(fromDate, toDate);
+}
+
+
+// ================= GENERATE LIBRARY REPORT =================
+
+async function generateLibraryReport(from, to) {
+
+    try {
+
+        const response =
+            await fetch(
+                API +
+                "/reports/library?from=" +
+                encodeURIComponent(from) +
+                "&to=" +
+                encodeURIComponent(to)
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.error ||
+                "Failed to generate report"
+            );
+
+            return;
+        }
+
+        currentReport = data;
+
+        let output =
+            "COLLEGE LIBRARY MANAGEMENT SYSTEM\n";
+
+        output +=
+            "LIBRARY ACTIVITY REPORT\n\n";
+
+        output +=
+            "From: " +
+            data.from +
+            "\n";
+
+        output +=
+            "To: " +
+            data.to +
+            "\n";
+
+        output +=
+            "Total Activities: " +
+            data.total +
+            "\n\n";
+
+
+        if (!data.logs || data.logs.length === 0) {
+
+            output +=
+                "No library activity found for the selected date(s).";
+
+        } else {
+
+            data.logs.forEach((log, index) => {
+
+                output +=
+                    (index + 1) +
+                    ". " +
+                    log.date +
+                    " | " +
+                    log.operation +
+                    " | " +
+                    log.student_name +
+                    " | " +
+                    log.roll +
+                    " | " +
+                    log.book_name +
+                    "\n";
+            });
+        }
+
+        document
+            .getElementById("reportOutput")
+            .textContent = output;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to generate report.\n" +
+            "Make sure the backend is running."
+        );
+    }
+}
+
+
+// ================= DOWNLOAD REPORT =================
+
+function downloadReport() {
+
+    if (
+        !currentReport ||
+        !currentReport.logs
+    ) {
+
+        alert(
+            "Please generate a report first."
+        );
+
+        return;
+    }
+
+    const {
+        jsPDF
+    } = window.jspdf;
+
+    const doc =
+        new jsPDF();
+
+    doc.setFontSize(16);
+
+    doc.text(
+        "College Library Management System",
+        14,
+        15
+    );
+
+    doc.setFontSize(13);
+
+    doc.text(
+        "Library Activity Report",
+        14,
+        24
+    );
+
+    doc.setFontSize(10);
+
+    doc.text(
+        "From: " +
+        currentReport.from,
+        14,
+        32
+    );
+
+    doc.text(
+        "To: " +
+        currentReport.to,
+        14,
+        38
+    );
+
+    doc.text(
+        "Total Activities: " +
+        currentReport.total,
+        14,
+        44
+    );
+
+
+    const rows =
+        currentReport.logs.map(
+            (log, index) => [
+
+                index + 1,
+
+                log.date,
+
+                log.operation,
+
+                log.student_name || "-",
+
+                log.roll || "-",
+
+                log.book_name || "-",
+
+                log.author || "-"
+            ]
+        );
+
+
+    doc.autoTable({
+
+        startY: 50,
+
+        head: [[
+
+            "S.No",
+
+            "Date",
+
+            "Action",
+
+            "Student",
+
+            "Roll No",
+
+            "Book",
+
+            "Author"
+
+        ]],
+
+        body: rows,
+
+        styles: {
+            fontSize: 8
+        },
+
+        headStyles: {
+            fontSize: 8
+        }
+
+    });
+
+
+    doc.save(
+        "library_report_" +
+        currentReport.from +
+        "_to_" +
+        currentReport.to +
+        ".pdf"
+    );
 }
