@@ -706,17 +706,17 @@ async function loadIssuedBooks() {
 
                 <td>${index + 1}</td>
 
-                <td>${book.bookName}</td>
+                <td>${book.book_name}</td>
 
-                <td>${book.author}</td>
+                <td>${book.author || "-"}</td>
 
-                <td>${book.issueDate}</td>
+                <td>${book.issue_date}</td>
 
-                <td>${book.dueDate || "-"}</td>
+                <td>${book.due_date || "-"}</td>
 
                 <td>${book.status}</td>
 
-                <td>${book.returnDate || "-"}</td>
+                <td>${book.return_date || "-"}</td>
 
                 <td>
 
@@ -725,7 +725,7 @@ async function loadIssuedBooks() {
 
                         ?
 
-                        `<button onclick="returnBook(${book.transactionId})">
+                        `<button onclick="returnBook(${book.transaction_id})">
                             Return
                         </button>`
 
@@ -739,6 +739,7 @@ async function loadIssuedBooks() {
             `;
 
             table.appendChild(row);
+
         });
 
     } catch (error) {
