@@ -951,18 +951,67 @@ async function issueBook() {
 // Temporary placeholder.
 // MySQL return transaction will be connected next.
 
-function returnBook(bookIndex) {
+async function returnBook(transactionId) {
 
     if (!currentStudent) {
         return;
     }
 
-    alert(
-        "The Return Book API will be connected next. " +
-        "Do not use this function yet."
-    );
-}
+    const returnDate =
+        new Date().toISOString().split("T")[0];
 
+    if (!confirm("Return this book?")) {
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API + "/transactions/return",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        transactionId: transactionId,
+                        returnDate: returnDate
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.error ||
+                "Failed to return book"
+            );
+
+            return;
+        }
+
+        alert("Book returned successfully");
+
+        await loadBooks();
+
+        await showProfile(currentStudent.roll);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to return book.\n" +
+            "Make sure the backend is running."
+        );
+    }
+}
 
 // ================= UPDATE BOOK STATUS =================
 
