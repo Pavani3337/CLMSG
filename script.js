@@ -1258,11 +1258,7 @@ async function returnBook(transactionId) {
         return;
     }
 
-    const returnDate =
-        new Date()
-            .toISOString()
-            .split("T")[0];
-
+    
     if (!confirm("Return this book?")) {
         return;
     }
@@ -1282,10 +1278,7 @@ async function returnBook(transactionId) {
                     body: JSON.stringify({
 
                         transactionId:
-                            transactionId,
-
-                        returnDate:
-                            returnDate
+                            transactionId
 
                     })
                 }

@@ -658,17 +658,29 @@ app.post("/api/transactions/issue", async (req, res) => {
 app.post("/api/transactions/return", async (req, res) => {
 
     const {
-        transactionId,
-        returnDate
+        transactionId
     } = req.body;
 
-    if (!transactionId || !returnDate) {
+    if (!transactionId) {
 
         return res.status(400).json({
-            error: "Transaction ID and return date are required"
+            error: "Transaction ID is required"
         });
 
     }
+
+    const now = new Date();
+
+    const returnDate =
+        now.getFullYear() +
+        "-" +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(now.getDate()).padStart(2, "0");
+
+
+
+
 
     const connection = await pool.getConnection();
 
