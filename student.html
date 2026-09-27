@@ -1,191 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Student Portal - CLMSG</title>
 
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
+<link rel="stylesheet" href="style.css">
 
 <style>
-body{
-    font-family: Arial;
-    background:#f4f6f9;
-    padding:20px;
+
+.student-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 25px;
+    text-align: center;
 }
 
-.box{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    max-width:500px;
-    margin:auto;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+.student-container input {
+    width: 90%;
+    padding: 12px;
+    margin: 8px;
 }
 
-input, button{
-    width:100%;
-    padding:10px;
-    margin:10px 0;
+.student-container button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
 }
 
-button{
-    background:#2563eb;
-    color:white;
-    border:none;
-    cursor:pointer;
+#otpSection,
+#studentDashboard {
+    display: none;
 }
 
-table{
-    width:100%;
-    margin-top:20px;
-    border-collapse:collapse;
+.alert-box {
+    margin: 15px 0;
+    padding: 10px;
 }
 
-th, td{
-    border:1px solid #ddd;
-    padding:10px;
-    text-align:center;
-}
-
-th{
-    background:#2563eb;
-    color:white;
-}
 </style>
+
 </head>
+
 
 <body>
 
-<h2 style="text-align:center;">Student Library Portal</h2>
+<h1>College Library Management System</h1>
 
-<div class="box">
 
-    <h3>Enter Details</h3>
+<!-- STUDENT LOGIN -->
 
-    <input id="roll" placeholder="Enter Roll Number">
-    <input id="phone" placeholder="Enter Phone Number">
+<div id="loginSection" class="student-container">
 
-    <button onclick="viewHistory()">View My History</button>
+    <h2>Student Login</h2>
 
-    <button onclick="downloadReport()">Download My Report</button>
+    <input
+        type="text"
+        id="studentRoll"
+        placeholder="Enter Roll Number">
 
-    <div id="result"></div>
+    <input
+        type="text"
+        id="studentPhone"
+        placeholder="Registered Mobile Number">
+
+    <br>
+
+    <button onclick="sendOTP()">
+        Send OTP
+    </button>
+
+
+    <!-- OTP -->
+
+    <div id="otpSection">
+
+        <h3>OTP Verification</h3>
+
+        <input
+            type="text"
+            id="studentOTP"
+            placeholder="Enter OTP"
+            maxlength="6">
+
+        <br>
+
+        <button onclick="verifyOTP()">
+            Verify OTP
+        </button>
+
+    </div>
 
 </div>
 
+
+<!-- STUDENT DASHBOARD -->
+
+<div id="studentDashboard" class="student-container">
+
+    <h2>Student Dashboard</h2>
+
+    <div id="studentDetails"></div>
+
+    <div class="alert-box">
+
+        <h3>🔔 Alerts</h3>
+
+        <p id="alerts">
+            No alerts
+        </p>
+
+    </div>
+
+
+    <h3>Currently Issued Books</h3>
+
+    <div id="issuedBooks">
+        No books currently issued.
+    </div>
+
+
+    <br>
+
+    <button onclick="logoutStudent()">
+        Logout
+    </button>
+
+</div>
+
+
 <script>
 
-let currentStudent = null;
+let demoOTP = "";
 
-// ---------------- VERIFY STUDENT ----------------
-function viewHistory(){
 
-    let roll = document.getElementById("roll").value.trim();
-    let phone = document.getElementById("phone").value.trim();
+/* SEND OTP */
 
-    let students = JSON.parse(localStorage.getItem("students")) || [];
+function sendOTP() {
 
-    currentStudent = students.find(s =>
-        s.roll === roll && s.phone === phone
-    );
+    const roll =
+        document
+        .getElementById("studentRoll")
+        .value
+        .trim();
 
-    if(!currentStudent){
-        alert("Student not found");
+    const phone =
+        document
+        .getElementById("studentPhone")
+        .value
+        .trim();
+
+
+    if (!roll || !phone) {
+
+        alert(
+            "Please enter Roll Number and Registered Mobile Number."
+        );
+
         return;
     }
 
-    renderHistory();
-}
 
-// ---------------- SHOW HISTORY ----------------
-function renderHistory(){
+    /*
+       Temporary UI test only.
 
-    let history = JSON.parse(localStorage.getItem("bookHistory")) || [];
+       Real OTP generation and SMS
+       will be connected to Node.js
+       in the next step.
+    */
 
-    let myRecords = history.filter(h =>
-        h.roll === currentStudent.roll
+    demoOTP =
+        Math.floor(
+            100000 +
+            Math.random() * 900000
+        ).toString();
+
+
+    document
+        .getElementById("otpSection")
+        .style.display = "block";
+
+
+    alert(
+        "Demo OTP: " + demoOTP
     );
 
-    let html = `
-    <h3>My Book History</h3>
-    <table>
-        <tr>
-            <th>Book</th>
-            <th>Issue Date</th>
-            <th>Return Date</th>
-            <th>Status</th>
-        </tr>
-    `;
-
-    myRecords.forEach(r=>{
-        html += `
-        <tr>
-            <td>${r.bookName}</td>
-            <td>${r.issueDate}</td>
-            <td>${r.returnDate || "-"}</td>
-            <td>${r.status}</td>
-        </tr>
-        `;
-    });
-
-    html += `</table>`;
-
-    document.getElementById("result").innerHTML = html;
 }
 
-// ---------------- DOWNLOAD REPORT ----------------
-function downloadReport(){
 
-    if(!currentStudent){
-        alert("Please view history first");
+/* VERIFY OTP */
+
+function verifyOTP() {
+
+    const otp =
+        document
+        .getElementById("studentOTP")
+        .value
+        .trim();
+
+
+    if (!otp) {
+
+        alert("Please enter OTP.");
+
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
 
-    let history = JSON.parse(localStorage.getItem("bookHistory")) || [];
+    if (otp !== demoOTP) {
 
-    let myRecords = history.filter(h =>
-        h.roll === currentStudent.roll
+        alert("Invalid OTP.");
+
+        return;
+    }
+
+
+    const roll =
+        document
+        .getElementById("studentRoll")
+        .value
+        .trim();
+
+
+    document
+        .getElementById("loginSection")
+        .style.display = "none";
+
+
+    document
+        .getElementById("studentDashboard")
+        .style.display = "block";
+
+
+    document
+        .getElementById("studentDetails")
+        .innerHTML =
+        "<p>Roll Number: " +
+        roll +
+        "</p>";
+
+
+    alert(
+        "Student login successful."
     );
 
-    // HEADER
-    pdf.setFontSize(16);
-    pdf.text("Student Library Report", 105, 15, { align: "center" });
-
-    pdf.setFontSize(12);
-    pdf.text("Name: " + currentStudent.name, 14, 25);
-    pdf.text("Roll: " + currentStudent.roll, 14, 32);
-    pdf.text("Phone: " + currentStudent.phone, 14, 39);
-
-    // TABLE DATA
-    const tableData = myRecords.map((r, index) => [
-        index + 1,
-        r.bookName,
-        r.issueDate,
-        r.returnDate || "-",
-        r.status
-    ]);
-
-    pdf.autoTable({
-        startY: 50,
-        head: [[
-            "S.No",
-            "Book Name",
-            "Issue Date",
-            "Return Date",
-            "Status"
-        ]],
-        body: tableData
-    });
-
-    pdf.save(currentStudent.roll + "_report.pdf");
 }
 
+
+/* LOGOUT */
+
+function logoutStudent() {
+
+    document
+        .getElementById("studentDashboard")
+        .style.display = "none";
+
+
+    document
+        .getElementById("loginSection")
+        .style.display = "block";
+
+
+    document
+        .getElementById("studentOTP")
+        .value = "";
+
+
+    document
+        .getElementById("otpSection")
+        .style.display = "none";
+
+
+    demoOTP = "";
+
+}
 
 </script>
 
 </body>
+
 </html>
