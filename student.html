@@ -13,14 +13,15 @@
 <style>
 
 .student-container {
-    max-width: 500px;
-    margin: 50px auto;
+    max-width: 1000px;
+    margin: 30px auto;
     padding: 25px;
     text-align: center;
 }
 
 .student-container input {
     width: 90%;
+    max-width: 500px;
     padding: 12px;
     margin: 8px;
     box-sizing: border-box;
@@ -39,13 +40,59 @@
 
 .alert-box {
     margin: 15px 0;
-    padding: 15px;
+    padding: 12px;
     border-radius: 8px;
 }
 
-.book-card {
-    margin: 10px 0;
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.student-table th,
+.student-table td {
+    border: 1px solid #999;
     padding: 10px;
+    text-align: center;
+}
+
+.student-table th {
+    background: #eeeeee;
+    font-weight: bold;
+}
+
+.student-table tr:hover {
+    background: #f5f5f5;
+}
+
+.status-issued {
+    font-weight: bold;
+}
+
+.status-returned {
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+
+    .student-container {
+        padding: 10px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 7px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
 }
 
 </style>
@@ -434,126 +481,175 @@ async function loadStudentDashboard(roll) {
 
         /* CURRENT BOOKS */
 
-        let issuedHTML = "";
+        /* CURRENT BOOKS */
 
-        let alertsHTML = "";
+let issuedHTML = "";
+let alertsHTML = "";
 
+if (data.issued.length === 0) {
 
-        if (data.issued.length === 0) {
+    issuedHTML =
+        "<p>No books currently issued.</p>";
 
-            issuedHTML =
-                "<p>No books currently issued.</p>";
+    alertsHTML =
+        "<p>No alerts.</p>";
 
-            alertsHTML =
-                "<p>No alerts.</p>";
+} else {
 
-        } else {
+    issuedHTML =
+        "<div class='table-container'>" +
 
+        "<table class='student-table'>" +
 
-            data.issued.forEach(book => {
-
-
-                const alert =
-                    getDueAlert(book.due_date);
-
-
-                issuedHTML +=
-
-                    "<div class='book-card'>" +
-
-                    "<b>" +
-                    book.book_name +
-                    "</b><br>" +
-
-                    "Author: " +
-                    (book.author || "-") +
-                    "<br>" +
-
-                    "Issue Date: " +
-                    formatDate(book.issue_date) +
-                    "<br>" +
-
-                    "Due Date: " +
-                    formatDate(book.due_date) +
-
-                    "</div><hr>";
+        "<tr>" +
+        "<th>Book</th>" +
+        "<th>Author</th>" +
+        "<th>Issue Date</th>" +
+        "<th>Due Date</th>" +
+        "<th>Status</th>" +
+        "</tr>";
 
 
-                if (alert) {
+    data.issued.forEach(book => {
 
-                    alertsHTML +=
+        issuedHTML +=
 
-                        "<p>" +
+            "<tr>" +
 
-                        "<b>" +
-                        book.book_name +
-                        "</b><br>" +
+            "<td>" +
+            book.book_name +
+            "</td>" +
 
-                        alert +
+            "<td>" +
+            (book.author || "-") +
+            "</td>" +
 
-                        "</p>";
+            "<td>" +
+            formatDate(book.issue_date) +
+            "</td>" +
 
-                }
+            "<td>" +
+            formatDate(book.due_date) +
+            "</td>" +
 
-            });
+            "<td class='status-issued'>" +
+            book.status +
+            "</td>" +
+
+            "</tr>";
+
+
+        const alert =
+            getDueAlert(book.due_date);
+
+
+        if (alert) {
+
+            alertsHTML +=
+
+                "<p>" +
+
+                "<b>" +
+                book.book_name +
+                "</b> - " +
+
+                alert +
+
+                "</p>";
 
         }
 
-
-        document
-            .getElementById("issuedBooks")
-            .innerHTML = issuedHTML;
+    });
 
 
-        document
-            .getElementById("alerts")
-            .innerHTML = alertsHTML;
+    issuedHTML +=
+
+        "</table>" +
+        "</div>";
+
+}
+
+
+document.getElementById("issuedBooks").innerHTML =
+    issuedHTML;
+
+document.getElementById("alerts").innerHTML =
+    alertsHTML;
+
 
 
         /* BORROWING HISTORY */
 
-        let historyHTML = "";
+        /* BORROWING HISTORY */
+
+let historyHTML = "";
+
+if (data.history.length === 0) {
+
+    historyHTML =
+        "<p>No borrowing history.</p>";
+
+} else {
+
+    historyHTML =
+
+        "<div class='table-container'>" +
+
+        "<table class='student-table'>" +
+
+        "<tr>" +
+        "<th>Book</th>" +
+        "<th>Issue Date</th>" +
+        "<th>Return Date</th>" +
+        "<th>Status</th>" +
+        "</tr>";
 
 
-        if (data.history.length === 0) {
+    data.history.forEach(book => {
 
-            historyHTML =
-                "<p>No borrowing history.</p>";
-
-        } else {
-
-
-            data.history.forEach(book => {
-
-                historyHTML +=
-
-                    "<p>" +
-
-                    "<b>" +
-                    book.book_name +
-                    "</b><br>" +
-
-                    "Issue Date: " +
-                    formatDate(book.issue_date) +
-                    "<br>" +
-
-                    "Return Date: " +
-                    formatDate(book.return_date) +
-                    "<br>" +
-
-                    "Status: " +
-                    book.status +
-
-                    "</p><hr>";
-
-            });
-
-        }
+        const statusClass =
+            book.status === "Returned"
+            ? "status-returned"
+            : "status-issued";
 
 
-        document
-            .getElementById("history")
-            .innerHTML = historyHTML;
+        historyHTML +=
+
+            "<tr>" +
+
+            "<td>" +
+            book.book_name +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.issue_date) +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.return_date) +
+            "</td>" +
+
+            "<td class='" +
+            statusClass +
+            "'>" +
+            book.status +
+            "</td>" +
+
+            "</tr>";
+
+    });
+
+
+    historyHTML +=
+
+        "</table>" +
+        "</div>";
+
+}
+
+
+document.getElementById("history").innerHTML =
+    historyHTML;
 
 
     } catch (error) {
