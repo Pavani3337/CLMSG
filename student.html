@@ -99,29 +99,46 @@
 
 <!-- STUDENT DASHBOARD -->
 
-<div id="studentDashboard" class="student-container">
+<div id="studentDashboard" class="student-dashboard">
 
     <h2>Student Dashboard</h2>
 
     <div id="studentDetails"></div>
 
-    <div class="alert-box">
+    <h3 id="bookCount">
+        Books Issued: 0 / 4
+    </h3>
 
-        <h3>🔔 Alerts</h3>
-
-        <p id="alerts">
-            No alerts
-        </p>
-
-    </div>
-
+    <hr>
 
     <h3>Currently Issued Books</h3>
 
     <div id="issuedBooks">
-        No books currently issued.
+        Loading...
     </div>
 
+    <hr>
+
+    <h3>Borrowing History</h3>
+
+    <div id="history">
+        Loading...
+    </div>
+
+    <hr>
+
+    <h3>Search Books</h3>
+
+    <input
+        type="text"
+        id="bookSearch"
+        placeholder="Enter book name">
+
+    <button onclick="searchBooks()">
+        Search
+    </button>
+
+    <div id="searchResults"></div>
 
     <br>
 
@@ -130,7 +147,6 @@
     </button>
 
 </div>
-
 
 <script>
 
@@ -228,7 +244,9 @@ async function verifyOTP() {
 
         document.getElementById("loginSection").style.display = "none";
 
-        document.getElementById("studentDashboard").style.display = "block";
+document.getElementById("studentDashboard").style.display = "block";
+
+loadStudentDashboard(data.student.roll);
 
         document.getElementById("studentDetails").innerHTML =
             "<p>Name: " + data.student.name + "</p>" +
@@ -273,6 +291,133 @@ function logoutStudent() {
     demoOTP = "";
 
 }
+
+
+
+
+
+
+
+
+async function loadStudentDashboard(roll) {
+
+    try {
+
+        const response = await fetch(
+            "http://10.49.217.244:5000/api/student/" +
+            encodeURIComponent(roll) +
+            "/dashboard"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+
+        document.getElementById("studentDetails").innerHTML =
+            "<p>Name: " + data.student.name + "</p>" +
+            "<p>Roll Number: " + data.student.roll + "</p>" +
+            "<p>Branch: " + data.student.branch + "</p>";
+
+        document.getElementById("bookCount").innerText =
+            "Books Issued: " +
+            data.issuedBooks +
+            " / " +
+            data.bookLimit;
+
+
+        /* CURRENT BOOKS */
+
+        let issuedHTML = "";
+
+        if (data.issued.length === 0) {
+
+            issuedHTML =
+                "<p>No books currently issued.</p>";
+
+        } else {
+
+            data.issued.forEach(book => {
+
+                issuedHTML +=
+                    "<p>" +
+                    "<b>" + book.book_name + "</b><br>" +
+                    "Author: " + (book.author || "-") + "<br>" +
+                    "Issue Date: " + formatDate(book.issue_date) + "<br>" +
+                    "Due Date: " + formatDate(book.due_date) +
+                    "</p><hr>";
+
+            });
+
+        }
+
+        document.getElementById("issuedBooks").innerHTML =
+            issuedHTML;
+
+
+        /* HISTORY */
+
+        let historyHTML = "";
+
+        if (data.history.length === 0) {
+
+            historyHTML =
+                "<p>No borrowing history.</p>";
+
+        } else {
+
+            data.history.forEach(book => {
+
+                historyHTML +=
+                    "<p>" +
+                    "<b>" + book.book_name + "</b><br>" +
+                    "Issue Date: " + formatDate(book.issue_date) + "<br>" +
+                    "Return Date: " + formatDate(book.return_date) + "<br>" +
+                    "Status: " + book.status +
+                    "</p><hr>";
+
+            });
+
+        }
+
+        document.getElementById("history").innerHTML =
+            historyHTML;
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to load student dashboard.");
+
+    }
+
+}
+
+
+
+
+
+
+
+function formatDate(value) {
+
+    if (!value) {
+        return "-";
+    }
+
+    return String(value).split("T")[0];
+
+}
+
+
+
+
+
+
+
+
 
 </script>
 

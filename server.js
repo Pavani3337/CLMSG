@@ -1404,3 +1404,83 @@ app.post("/api/student/verify-otp", async (req, res) => {
     }
 
 });
+
+
+
+
+app.get("/api/student/:roll/dashboard", async (req, res) => {
+
+    try {
+
+        const roll = req.params.roll;
+
+        const [students] = await pool.query(
+            `SELECT id, name, roll, phone, branch
+             FROM students
+             WHERE roll = ? AND is_active = TRUE`,
+            [roll]
+        );
+
+        if (students.length === 0) {
+            return res.status(404).json({
+                message: "Student not found"
+            });
+        }
+
+        const student = students[0];
+
+        const [issued] = await pool.query(
+            `SELECT
+                b.name AS book_name,
+                b.author,
+                t.issue_date,
+                t.due_date,
+                t.status
+             FROM book_transactions t
+             JOIN books b ON t.book_id = b.id
+             WHERE t.student_id = ?
+             AND t.status = 'Issued'
+             ORDER BY t.issue_date DESC`,
+            [student.id]
+        );
+
+        const [history] = await pool.query(
+            `SELECT
+                b.name AS book_name,
+                t.issue_date,
+                t.return_date,
+                t.status
+             FROM book_transactions t
+             JOIN books b ON t.book_id = b.id
+             WHERE t.student_id = ?
+             ORDER BY t.issue_date DESC`,
+            [student.id]
+        );
+
+        res.json({
+            student: {
+                name: student.name,
+                roll: student.roll,
+                branch: student.branch
+            },
+
+            issuedBooks: issued.length,
+
+            bookLimit: 4,
+
+            issued: issued,
+
+            history: history
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Server error"
+        });
+
+    }
+
+});
