@@ -1,767 +1,867 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0">
+<title>Student Portal - CLMSG</title>
 
-<title>
-Student Library Portal
-</title>
+<link rel="stylesheet" href="style.css">
 
 <style>
 
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 20px;
-}
-
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
+.student-container {
+    max-width: 1000px;
+    margin: 30px auto;
     padding: 25px;
-    border-radius: 12px;
+    text-align: center;
 }
 
-input {
-    width: 100%;
+.student-container input {
+    width: 90%;
+    max-width: 500px;
     padding: 12px;
-    margin: 8px 0;
+    margin: 8px;
     box-sizing: border-box;
 }
 
-button {
-    padding: 10px 18px;
-    margin: 5px;
-    border: none;
-    border-radius: 6px;
-    background: #2563eb;
-    color: white;
+.student-container button {
+    padding: 10px 20px;
+    margin: 10px;
     cursor: pointer;
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-.hidden {
+#otpSection,
+#studentDashboard {
     display: none;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+.alert-box {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
 }
 
-th,
-td {
-    border: 1px solid #ddd;
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 15px 0;
+}
+
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.student-table th,
+.student-table td {
+    border: 1px solid #999;
     padding: 10px;
     text-align: center;
 }
 
-th {
-    background: #f1f5f9;
+.student-table th {
+    background: #eeeeee;
+    font-weight: bold;
 }
 
-.info {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 8px;
+.student-table tr:hover {
+    background: #f5f5f5;
 }
 
-.logout {
-    background: #dc2626;
+.status-issued {
+    font-weight: bold;
+}
+
+.status-returned {
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+
+    .student-container {
+        padding: 10px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 7px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
-<div class="container">
-
-<h1>
-Student Library Portal
-</h1>
+<h1>College Library Management System</h1>
 
 
-<!-- LOGIN -->
+<!-- ================= STUDENT LOGIN ================= -->
 
-<div id="studentLoginSection">
+<div id="loginSection" class="student-container">
 
-<h2>
-Student Login
-</h2>
+    <h2>Student Login</h2>
 
-<input
-    id="studentLoginRoll"
-    type="text"
-    placeholder="Enter Roll Number">
+    <input
+        type="text"
+        id="studentRoll"
+        placeholder="Enter Roll Number">
 
-<input
-    id="studentLoginPhone"
-    type="tel"
-    placeholder="Registered Mobile Number">
+    <input
+        type="text"
+        id="studentPhone"
+        placeholder="Registered Mobile Number">
 
-<button
-    onclick="sendStudentOTP()">
+    <br>
 
-Send OTP
-
-</button>
+    <button onclick="sendOTP()">
+        Send OTP
+    </button>
 
 
-<div
-    id="studentOTPArea"
-    class="hidden">
+    <!-- OTP SECTION -->
 
-<input
-    id="studentOTP"
-    type="text"
-    maxlength="6"
-    placeholder="Enter OTP">
+    <div id="otpSection">
 
-<button
-    onclick="verifyStudentOTP()">
+        <h3>OTP Verification</h3>
 
-Verify OTP
+        <input
+            type="text"
+            id="studentOTP"
+            placeholder="Enter OTP"
+            maxlength="6">
 
-</button>
+        <br>
 
-</div>
+        <button onclick="verifyOTP()">
+            Verify OTP
+        </button>
+
+    </div>
 
 </div>
 
 
-<!-- DASHBOARD -->
+<!-- ================= STUDENT DASHBOARD ================= -->
 
-<div
-    id="studentDashboard"
-    class="hidden">
+<div id="studentDashboard" class="student-container">
 
-<h2>
-My Library Profile
-</h2>
+    <h2>Student Dashboard</h2>
 
-<div class="info">
-
-<p>
-<strong>Name:</strong>
-<span id="studentNameDisplay"></span>
-</p>
-
-<p>
-<strong>Roll:</strong>
-<span id="studentRollDisplay"></span>
-</p>
-
-<p>
-<strong>Branch:</strong>
-<span id="studentBranchDisplay"></span>
-</p>
-
-<p>
-<strong>Current Books:</strong>
-<span id="studentBookCount"></span>
-</p>
-
-</div>
+    <div id="studentDetails"></div>
 
 
-<button
-    onclick="downloadMyReport()">
-
-Download My Report
-
-</button>
-
-<button
-    class="logout"
-    onclick="studentLogout()">
-
-Logout
-
-</button>
+    <h3 id="bookCount">
+        Books Issued: 0 / 4
+    </h3>
 
 
-<h2>
-My Book History
-</h2>
+    <!-- DUE DATE ALERTS -->
 
-<table>
+    <div class="alert-box">
 
-<thead>
+        <h3>🔔 Due-Date Alerts</h3>
 
-<tr>
+        <div id="alerts">
+            No alerts.
+        </div>
 
-<th>
-#
-</th>
+    </div>
 
-<th>
-Book
-</th>
 
-<th>
-Author
-</th>
+    <hr>
 
-<th>
-Issue Date
-</th>
 
-<th>
-Due Date
-</th>
+    <!-- CURRENTLY ISSUED BOOKS -->
 
-<th>
-Status
-</th>
+    <h3>Currently Issued Books</h3>
 
-<th>
-Return Date
-</th>
+    <div id="issuedBooks">
+        Loading...
+    </div>
 
-</tr>
 
-</thead>
+    <hr>
 
-<tbody
-    id="studentHistoryTable">
 
-</tbody>
+    <!-- BORROWING HISTORY -->
 
-</table>
+    <h3>Borrowing History</h3>
 
-</div>
+    <div id="history">
+        Loading...
+    </div>
+
+
+    <hr>
+
+
+    <!-- BOOK SEARCH -->
+
+    <h3>Search Books</h3>
+
+    <input
+        type="text"
+        id="bookSearch"
+        placeholder="Enter book name">
+
+    <button onclick="searchBooks()">
+        Search
+    </button>
+
+    <div id="searchResults"></div>
+
+
+    <br>
+
+    <button onclick="logoutStudent()">
+        Logout
+    </button>
 
 </div>
 
 
 <script>
 
-const API =
-    "http://10.49.217.244:5000/api";
 
+/* ================= SEND OTP ================= */
 
-async function studentAPI(
-    url,
-    options = {}
-) {
-
-    const token =
-        sessionStorage.getItem(
-            "studentToken"
-        );
-
-    const headers =
-        options.headers || {};
-
-    if (token) {
-
-        headers.Authorization =
-            "Bearer " + token;
-    }
-
-    return fetch(
-        url,
-        {
-            ...options,
-            headers
-        }
-    );
-}
-
-
-async function sendStudentOTP() {
+async function sendOTP() {
 
     const roll =
         document
-            .getElementById(
-                "studentLoginRoll"
-            )
-            .value
-            .trim();
+        .getElementById("studentRoll")
+        .value
+        .trim();
 
     const phone =
         document
-            .getElementById(
-                "studentLoginPhone"
-            )
-            .value
-            .trim();
+        .getElementById("studentPhone")
+        .value
+        .trim();
+
 
     if (!roll || !phone) {
 
         alert(
-            "Enter roll number and registered mobile number"
+            "Please enter Roll Number and Registered Mobile Number."
         );
 
         return;
     }
 
+
     try {
 
-        const response =
-            await fetch(
-                API +
-                "/student/send-otp",
-                {
-                    method:
-                        "POST",
+        const response = await fetch(
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+            "http://10.49.217.244:5000/api/student/send-otp",
 
-                    body:
-                        JSON.stringify({
-                            roll,
-                            phone
-                        })
-                }
-            );
+            {
+                method: "POST",
 
-        const data =
-            await response.json();
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    roll: roll,
+
+                    phone: phone
+
+                })
+            }
+
+        );
+
+
+        const data = await response.json();
+
 
         if (!response.ok) {
 
             alert(
-                data.error ||
-                "Unable to send OTP"
+                data.message ||
+                "Unable to generate OTP."
             );
 
             return;
         }
 
+
         document
-            .getElementById(
-                "studentOTPArea"
-            )
-            .classList.remove(
-                "hidden"
-            );
+            .getElementById("otpSection")
+            .style.display = "block";
+
 
         alert(
-            "OTP sent to your registered mobile number."
+            "OTP generated. Check the Node.js terminal."
         );
+
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Backend is not reachable."
+            "Unable to connect to CLMSG server."
         );
+
     }
+
 }
 
 
-async function verifyStudentOTP() {
+/* ================= VERIFY OTP ================= */
+
+async function verifyOTP() {
 
     const roll =
         document
-            .getElementById(
-                "studentLoginRoll"
-            )
-            .value
-            .trim();
-
-    const phone =
-        document
-            .getElementById(
-                "studentLoginPhone"
-            )
-            .value
-            .trim();
+        .getElementById("studentRoll")
+        .value
+        .trim();
 
     const otp =
         document
-            .getElementById(
-                "studentOTP"
-            )
-            .value
-            .trim();
+        .getElementById("studentOTP")
+        .value
+        .trim();
+
 
     if (!otp) {
 
-        alert(
-            "Enter the OTP"
-        );
+        alert("Please enter OTP.");
 
         return;
     }
 
-    try {
-
-        const response =
-            await fetch(
-                API +
-                "/student/verify-otp",
-                {
-                    method:
-                        "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify({
-                            roll,
-                            phone,
-                            otp
-                        })
-                }
-            );
-
-        const data =
-            await response.json();
-
-        if (!response.ok) {
-
-            alert(
-                data.error ||
-                "Invalid OTP"
-            );
-
-            return;
-        }
-
-        sessionStorage.setItem(
-            "studentToken",
-            data.token
-        );
-
-        await loadDashboard();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to verify OTP."
-        );
-    }
-}
-
-
-async function loadDashboard() {
 
     try {
 
-        const response =
-            await studentAPI(
-                API +
-                "/student/dashboard"
-            );
+        const response = await fetch(
 
-        const data =
-            await response.json();
+            "http://10.49.217.244:5000/api/student/verify-otp",
 
-        if (!response.ok) {
+            {
+                method: "POST",
 
-            sessionStorage.removeItem(
-                "studentToken"
-            );
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            alert(
-                data.error ||
-                "Session expired"
-            );
+                body: JSON.stringify({
 
-            return;
-        }
+                    roll: roll,
 
-        document
-            .getElementById(
-                "studentLoginSection"
-            )
-            .classList.add(
-                "hidden"
-            );
+                    otp: otp
 
-        document
-            .getElementById(
-                "studentDashboard"
-            )
-            .classList.remove(
-                "hidden"
-            );
-
-
-        document
-            .getElementById(
-                "studentNameDisplay"
-            )
-            .textContent =
-                data.student.name;
-
-        document
-            .getElementById(
-                "studentRollDisplay"
-            )
-            .textContent =
-                data.student.roll;
-
-        document
-            .getElementById(
-                "studentBranchDisplay"
-            )
-            .textContent =
-                data.student.branch;
-
-        document
-            .getElementById(
-                "studentBookCount"
-            )
-            .textContent =
-                data.issuedBooks +
-                " / " +
-                data.bookLimit;
-
-
-        const table =
-            document.getElementById(
-                "studentHistoryTable"
-            );
-
-        table.innerHTML = "";
-
-
-        data.history.forEach(
-            (record, index) => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-                row.innerHTML = `
-
-                    <td>
-                        ${index + 1}
-                    </td>
-
-                    <td>
-                        ${record.book_name}
-                    </td>
-
-                    <td>
-                        ${record.author || "-"}
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            record.issue_date
-                        )}
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            record.due_date
-                        )}
-                    </td>
-
-                    <td>
-                        ${record.status}
-                    </td>
-
-                    <td>
-                        ${formatDate(
-                            record.return_date
-                        )}
-                    </td>
-
-                `;
-
-                table.appendChild(
-                    row
-                );
+                })
             }
+
         );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                "OTP verification failed."
+            );
+
+            return;
+        }
+
+
+        document
+            .getElementById("loginSection")
+            .style.display = "none";
+
+
+        document
+            .getElementById("studentDashboard")
+            .style.display = "block";
+
+
+        loadStudentDashboard(
+            data.student.roll
+        );
+
+
+        alert(
+            "Student login successful."
+        );
+
 
     } catch (error) {
 
         console.error(error);
 
         alert(
-            "Unable to load dashboard."
+            "Unable to connect to CLMSG server."
         );
+
     }
+
 }
 
 
-function formatDate(date) {
+/* ================= LOAD DASHBOARD ================= */
 
-    if (!date) {
+async function loadStudentDashboard(roll) {
+
+    try {
+
+        const response = await fetch(
+
+            "http://10.49.217.244:5000/api/student/" +
+            encodeURIComponent(roll) +
+            "/dashboard"
+
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                "Unable to load dashboard."
+            );
+
+            return;
+        }
+
+
+        /* STUDENT DETAILS */
+
+        document
+            .getElementById("studentDetails")
+            .innerHTML =
+
+            "<p>Name: " +
+            data.student.name +
+            "</p>" +
+
+            "<p>Roll Number: " +
+            data.student.roll +
+            "</p>" +
+
+            "<p>Branch: " +
+            data.student.branch +
+            "</p>";
+
+
+        /* BOOK COUNT */
+
+        document
+            .getElementById("bookCount")
+            .innerText =
+
+            "Books Issued: " +
+            data.issuedBooks +
+            " / " +
+            data.bookLimit;
+
+
+        /* CURRENT BOOKS */
+
+        /* CURRENT BOOKS */
+
+let issuedHTML = "";
+let alertsHTML = "";
+
+if (data.issued.length === 0) {
+
+    issuedHTML =
+        "<p>No books currently issued.</p>";
+
+    alertsHTML =
+        "<p>No alerts.</p>";
+
+} else {
+
+    issuedHTML =
+        "<div class='table-container'>" +
+
+        "<table class='student-table'>" +
+
+        "<tr>" +
+        "<th>Book</th>" +
+        "<th>Author</th>" +
+        "<th>Issue Date</th>" +
+        "<th>Due Date</th>" +
+        "<th>Status</th>" +
+        "</tr>";
+
+
+    data.issued.forEach(book => {
+
+        issuedHTML +=
+
+            "<tr>" +
+
+            "<td>" +
+            book.book_name +
+            "</td>" +
+
+            "<td>" +
+            (book.author || "-") +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.issue_date) +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.due_date) +
+            "</td>" +
+
+            "<td class='status-issued'>" +
+            book.status +
+            "</td>" +
+
+            "</tr>";
+
+
+        const alert =
+            getDueAlert(book.due_date);
+
+
+        if (alert) {
+
+            alertsHTML +=
+
+                "<p>" +
+
+                "<b>" +
+                book.book_name +
+                "</b> - " +
+
+                alert +
+
+                "</p>";
+
+        }
+
+    });
+
+
+    issuedHTML +=
+
+        "</table>" +
+        "</div>";
+
+}
+
+
+document.getElementById("issuedBooks").innerHTML =
+    issuedHTML;
+
+document.getElementById("alerts").innerHTML =
+    alertsHTML;
+
+
+
+        /* BORROWING HISTORY */
+
+        /* BORROWING HISTORY */
+
+let historyHTML = "";
+
+if (data.history.length === 0) {
+
+    historyHTML =
+        "<p>No borrowing history.</p>";
+
+} else {
+
+    historyHTML =
+
+        "<div class='table-container'>" +
+
+        "<table class='student-table'>" +
+
+        "<tr>" +
+        "<th>Book</th>" +
+        "<th>Issue Date</th>" +
+        "<th>Return Date</th>" +
+        "<th>Status</th>" +
+        "</tr>";
+
+
+    data.history.forEach(book => {
+
+        const statusClass =
+            book.status === "Returned"
+            ? "status-returned"
+            : "status-issued";
+
+
+        historyHTML +=
+
+            "<tr>" +
+
+            "<td>" +
+            book.book_name +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.issue_date) +
+            "</td>" +
+
+            "<td>" +
+            formatDate(book.return_date) +
+            "</td>" +
+
+            "<td class='" +
+            statusClass +
+            "'>" +
+            book.status +
+            "</td>" +
+
+            "</tr>";
+
+    });
+
+
+    historyHTML +=
+
+        "</table>" +
+        "</div>";
+
+}
+
+
+document.getElementById("history").innerHTML =
+    historyHTML;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load student dashboard."
+        );
+
+    }
+
+}
+
+
+/* ================= DATE FORMAT ================= */
+
+function formatDate(value) {
+
+    if (!value) {
 
         return "-";
+
     }
 
-    return String(date)
+
+    return String(value)
         .split("T")[0];
+
 }
 
 
-function downloadMyReport() {
+/* ================= DUE DATE ALERT ================= */
 
-    const token =
-        sessionStorage.getItem(
-            "studentToken"
-        );
+function getDueAlert(dueDate) {
 
-    if (!token) {
+    if (!dueDate) {
 
-        alert(
-            "Please login first"
-        );
+        return "";
 
-        return;
     }
 
-    studentAPI(
-        API +
-        "/student/dashboard"
-    )
-    .then(
-        response =>
-            response.json()
-    )
-    .then(
-        data => {
 
-            if (!data.history) {
+    /*
+       MySQL DATE is YYYY-MM-DD.
+       Create the date in local time to
+       avoid timezone/date-shift problems.
+    */
 
-                alert(
-                    "Unable to create report"
-                );
-
-                return;
-            }
-
-            let content =
-                "Student Library Report\n\n";
-
-            content +=
-                "Name: " +
-                data.student.name +
-                "\n";
-
-            content +=
-                "Roll: " +
-                data.student.roll +
-                "\n";
-
-            content +=
-                "Branch: " +
-                data.student.branch +
-                "\n";
-
-            content +=
-                "Current Books: " +
-                data.issuedBooks +
-                "/" +
-                data.bookLimit +
-                "\n\n";
+    const parts =
+        String(dueDate)
+        .split("T")[0]
+        .split("-");
 
 
-            data.history.forEach(
-                (record, index) => {
+    if (parts.length !== 3) {
 
-                    content +=
-                        (index + 1) +
-                        ". " +
-                        record.book_name +
-                        " | Issue: " +
-                        formatDate(
-                            record.issue_date
-                        ) +
-                        " | Due: " +
-                        formatDate(
-                            record.due_date
-                        ) +
-                        " | Return: " +
-                        formatDate(
-                            record.return_date
-                        ) +
-                        " | Status: " +
-                        record.status +
-                        "\n";
-                }
-            );
+        return "";
+
+    }
 
 
-            const blob =
-                new Blob(
-                    [content],
-                    {
-                        type:
-                            "text/plain"
-                    }
-                );
+    const due =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
 
-            const link =
-                document.createElement(
-                    "a"
-                );
 
-            link.href =
-                URL.createObjectURL(
-                    blob
-                );
+    const today =
+        new Date();
 
-            link.download =
-                data.student.roll +
-                "_library_report.txt";
-
-            link.click();
-
-            URL.revokeObjectURL(
-                link.href
-            );
-        }
+    today.setHours(
+        0,
+        0,
+        0,
+        0
     );
+
+
+    due.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    const difference =
+
+        Math.round(
+            (due - today) /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    if (difference > 3) {
+
+        return "";
+
+    }
+
+
+    if (difference === 3) {
+
+        return "📚 Book is due in 3 days";
+
+    }
+
+
+    if (difference === 2) {
+
+        return "📚 Book is due in 2 days";
+
+    }
+
+
+    if (difference === 1) {
+
+        return "📚 Book is due tomorrow";
+
+    }
+
+
+    if (difference === 0) {
+
+        return "⚠️ Book is due today";
+
+    }
+
+
+    return "🚨 Book is overdue by " +
+           Math.abs(difference) +
+           " day(s)";
+
 }
 
 
-function studentLogout() {
+/* ================= BOOK SEARCH ================= */
 
-    sessionStorage.removeItem(
-        "studentToken"
+/*
+   Step 5 will connect this function
+   to the MySQL books API.
+*/
+
+function searchBooks() {
+
+    alert(
+        "Book search will be connected in the next step."
     );
 
-    location.reload();
 }
 
 
-window.onload =
-    function () {
+/* ================= LOGOUT ================= */
 
-        if (
-            sessionStorage.getItem(
-                "studentToken"
-            )
-        ) {
+function logoutStudent() {
 
-            loadDashboard();
-        }
-    };
+    document
+        .getElementById("studentDashboard")
+        .style.display = "none";
+
+
+    document
+        .getElementById("loginSection")
+        .style.display = "block";
+
+
+    document
+        .getElementById("studentRoll")
+        .value = "";
+
+
+    document
+        .getElementById("studentPhone")
+        .value = "";
+
+
+    document
+        .getElementById("studentOTP")
+        .value = "";
+
+
+    document
+        .getElementById("otpSection")
+        .style.display = "none";
+
+
+    document
+        .getElementById("studentDetails")
+        .innerHTML = "";
+
+
+    document
+        .getElementById("issuedBooks")
+        .innerHTML =
+        "Loading...";
+
+
+    document
+        .getElementById("history")
+        .innerHTML =
+        "Loading...";
+
+
+    document
+        .getElementById("alerts")
+        .innerHTML =
+        "No alerts.";
+
+}
 
 </script>
 
