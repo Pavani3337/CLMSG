@@ -1699,7 +1699,7 @@ app.listen(
     () => {
 
         console.log(
-            `CLMSG Backend running at http://10.49.217.244:${PORT}`
+            `CLMSG Backend running at http://10.140.94.244:5000:${PORT}`
         );
 
     }
