@@ -390,22 +390,46 @@ app.delete("/api/books/:serial", async (req, res) => {
 
 // ================= ISSUE BOOK =================
 
+
+
+// ================= ISSUE BOOK =================
+
 app.post("/api/transactions/issue", async (req, res) => {
 
     const {
         roll,
-        serial,
-        issueDate,
-        dueDate
+        serial
     } = req.body;
 
-    if (!roll || !serial || !issueDate || !dueDate) {
+    // Frontend only needs to send roll and book serial
+    if (!roll || !serial) {
 
         return res.status(400).json({
-            error: "Roll, book serial, issue date and due date are required"
+            error: "Roll number and book serial are required"
         });
 
     }
+
+    // Get current date in YYYY-MM-DD format
+    const now = new Date();
+
+    const issueDate =
+        now.getFullYear() +
+        "-" +
+        String(now.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(now.getDate()).padStart(2, "0");
+
+    // Due date = issue date + 15 days
+    const due = new Date(now);
+    due.setDate(due.getDate() + 15);
+
+    const dueDate =
+        due.getFullYear() +
+        "-" +
+        String(due.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(due.getDate()).padStart(2, "0");
 
     const connection = await pool.getConnection();
 
@@ -413,8 +437,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         await connection.beginTransaction();
 
-
-        // Find and lock student
+        // ================= FIND STUDENT =================
 
         const [students] = await connection.query(
 
@@ -440,8 +463,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         const student = students[0];
 
-
-        // Count current issued books
+        // ================= CURRENT ISSUED COUNT =================
 
         const [issuedBooks] = await connection.query(
 
@@ -457,8 +479,7 @@ app.post("/api/transactions/issue", async (req, res) => {
         const currentIssuedCount =
             Number(issuedBooks[0].count);
 
-
-        // Maximum 4 books
+        // ================= MAXIMUM 4 BOOKS =================
 
         if (currentIssuedCount >= MAX_BOOK_LIMIT) {
 
@@ -473,8 +494,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         }
 
-
-        // Lock book row
+        // ================= FIND AND LOCK BOOK =================
 
         const [books] = await connection.query(
 
@@ -503,8 +523,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         const book = books[0];
 
-
-        // Check availability
+        // ================= CHECK AVAILABILITY =================
 
         if (book.available_copies <= 0) {
 
@@ -516,8 +535,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         }
 
-
-        // Check duplicate active book
+        // ================= CHECK DUPLICATE =================
 
         const [activeIssue] = await connection.query(
 
@@ -544,8 +562,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         }
 
-
-        // Create transaction
+        // ================= CREATE TRANSACTION =================
 
         const [result] = await connection.query(
 
@@ -568,8 +585,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         );
 
-
-        // Decrease available copies
+        // ================= DECREASE AVAILABLE COPIES =================
 
         await connection.query(
 
@@ -582,8 +598,7 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         );
 
-
-        // Add library log
+        // ================= LIBRARY LOG =================
 
         await connection.query(
 
@@ -602,35 +617,43 @@ app.post("/api/transactions/issue", async (req, res) => {
 
         );
 
-
         await connection.commit();
-
 
         const newIssuedCount =
             currentIssuedCount + 1;
 
+        // ================= RESPONSE =================
 
         res.status(201).json({
 
             message: "Book issued successfully",
 
-            transactionId: result.insertId,
+            transactionId:
+                result.insertId,
 
-            student: student.name,
+            student:
+                student.name,
 
-            roll: roll,
+            roll:
+                roll,
 
-            book: book.name,
+            book:
+                book.name,
 
-            serial: serial,
+            serial:
+                serial,
 
-            issueDate: issueDate,
+            issueDate:
+                issueDate,
 
-            dueDate: dueDate,
+            dueDate:
+                dueDate,
 
-            issuedBooks: newIssuedCount,
+            issuedBooks:
+                newIssuedCount,
 
-            bookLimit: MAX_BOOK_LIMIT
+            bookLimit:
+                MAX_BOOK_LIMIT
 
         });
 
@@ -651,6 +674,8 @@ app.post("/api/transactions/issue", async (req, res) => {
     }
 
 });
+
+
 
 
 // ================= RETURN BOOK =================
@@ -1699,7 +1724,7 @@ app.listen(
     () => {
 
         console.log(
-            `CLMSG Backend running at  http://10.140.94.244:${PORT}`
+            `CLMSG Backend running at  http://10.142.67.244:${PORT}`
         );
 
     }
