@@ -1724,7 +1724,7 @@ app.listen(
     () => {
 
         console.log(
-            `CLMSG Backend running at  http://10.142.67.244:${PORT}`
+            `CLMSG Backend running at  http://10.126.247.244:${PORT}`
         );
 
     }
